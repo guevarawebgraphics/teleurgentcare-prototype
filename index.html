@@ -312,6 +312,13 @@
       // --- Symptom AI Chat (knowledge base + question flow) ---
       let chatQuestionIndex = 0;
 
+      const DEMO_SYMPTOM_QUESTIONS = [
+        { id: 'demo_1', text: 'What symptoms are you experiencing today?', type: 'text', summaryKey: 'symptoms_description' },
+        { id: 'demo_2', text: 'How long have you had these symptoms?', type: 'text', summaryKey: 'duration' },
+        { id: 'demo_3', text: 'Photo upload is required for certain symptoms (e.g. rash, skin). In production you would upload 2–3 clear photos here. (Demo: no upload — type anything to continue.)', type: 'text', summaryKey: 'photos_note' },
+        { id: 'demo_4', text: 'Anything else we should know?', type: 'text', summaryKey: 'additional_notes' }
+      ];
+
       function appendChatMessage(role, text) {
         const wrap = $('chat-messages');
         const div = document.createElement('div');
@@ -327,19 +334,18 @@
       }
 
       function startSymptomChat() {
-        const symptoms = selectedSymptoms.length
-          ? symptomsData.symptoms.filter(s => selectedSymptoms.includes(s.id))
-          : symptomsData.symptoms;
-        const seen = new Set();
-        currentQuestions = [];
         if (selectedSymptoms.length === 0) {
-          currentQuestions.push({ id: 'opening', text: 'What symptoms are you experiencing today?', type: 'text', summaryKey: 'symptoms_description' });
-        }
-        symptoms.forEach(s => {
-          (s.questions || []).forEach(q => {
-            if (!seen.has(q.id)) { seen.add(q.id); currentQuestions.push(q); }
+          currentQuestions = DEMO_SYMPTOM_QUESTIONS.slice();
+        } else {
+          const symptoms = symptomsData.symptoms.filter(s => selectedSymptoms.includes(s.id));
+          const seen = new Set();
+          currentQuestions = [];
+          symptoms.forEach(s => {
+            (s.questions || []).forEach(q => {
+              if (!seen.has(q.id)) { seen.add(q.id); currentQuestions.push(q); }
+            });
           });
-        });
+        }
         chatQuestionIndex = 0;
         answers = {};
         showScreen('symptom-chat');
