@@ -492,6 +492,37 @@
         return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
       }
 
+      function getAIRecommendation(mode, selectedCondition, symptomValue, answers) {
+        if (mode === 'condition' && selectedCondition) {
+          const name = selectedCondition.name || '';
+          const treatments = (selectedCondition.possibleTreatments || []).slice();
+          let line = 'Based on condition "' + name + '" and intake. ';
+          if (treatments.length > 0) {
+            line += 'Suggested treatment options: ' + treatments.join('; ') + '. Physician to confirm.';
+          } else {
+            line += 'Physician to determine treatment based on full assessment.';
+          }
+          return line;
+        }
+        const desc = (answers.symptoms_description || symptomValue || '').toLowerCase();
+        const duration = (answers.duration || '').toString();
+        let text = '';
+        if (/\bcough\b/.test(desc)) {
+          text = 'Based on reported symptoms (cough) and duration. Possible considerations: viral URI, acute bronchitis. Suggested: supportive care, rest, fluids; physician may consider further workup if indicated.';
+        } else if (/\bheadache\b/.test(desc)) {
+          text = 'Based on reported symptoms (headache) and duration. Possible considerations: tension headache, migraine, viral illness. Suggested: physician to confirm diagnosis and treatment based on severity and red flags.';
+        } else if (/\brash\b/.test(desc)) {
+          text = 'Based on reported symptoms (rash) and duration. Possible considerations: allergic reaction, viral exanthem, contact dermatitis. Suggested: physician to review and determine treatment; photo review when available.';
+        } else if (/\bnausea\b/.test(desc) || /\bvomit\b/.test(desc)) {
+          text = 'Based on reported symptoms (nausea/vomiting) and duration. Possible considerations: gastroenteritis, food-related. Suggested: physician to assess hydration and determine treatment.';
+        } else if (/\bthroat\b/.test(desc) || /\bsore\b/.test(desc)) {
+          text = 'Based on reported symptoms (throat) and duration. Possible considerations: viral pharyngitis, strep. Suggested: physician to determine need for testing and treatment.';
+        } else {
+          text = 'Based on reported symptoms and duration. Physician to determine differential and treatment based on full assessment.';
+        }
+        return text;
+      }
+
       function showSummary() {
         showScreen('summary');
         const symptomValue = selectedSymptoms.length
@@ -501,23 +532,25 @@
           ? { type: 'Condition', value: selectedCondition ? selectedCondition.name : '' }
           : { type: 'Symptoms', value: symptomValue };
         let html = '';
-        html += '<h3>Consultation type</h3><div class="row"><div class="label">Type</div><div class="value">' + escapeHtml(entry.type) + '</div></div>';
+        html += '<h3>1. Intake Summary (sent to physician)</h3>';
+        html += '<div class="row"><div class="label">Type</div><div class="value">' + escapeHtml(entry.type) + '</div></div>';
         html += '<div class="row"><div class="label">Selected</div><div class="value">' + escapeHtml(entry.value) + '</div></div>';
         if (mode === 'condition' && billingDetails && (billingDetails.name || billingDetails.email)) {
-          html += '<h3>Billing & payment</h3>';
           html += '<div class="row"><div class="label">Consultation fee</div><div class="value">$49.99</div></div>';
           if (billingDetails.name) html += '<div class="row"><div class="label">Billing name</div><div class="value">' + escapeHtml(billingDetails.name) + '</div></div>';
           if (billingDetails.email) html += '<div class="row"><div class="label">Email</div><div class="value">' + escapeHtml(billingDetails.email) + '</div></div>';
           if (billingDetails.address) html += '<div class="row"><div class="label">Billing address</div><div class="value">' + escapeHtml(billingDetails.address) + '</div></div>';
         }
         if (Object.keys(answers).length > 0) {
-          html += '<h3>Your answers</h3>';
           for (const key in answers) {
             const val = answers[key];
             if (val == null || val === '') continue;
             html += '<div class="row"><div class="label">' + escapeHtml(humanizeKey(key)) + '</div><div class="value">' + escapeHtml(String(val)) + '</div></div>';
           }
         }
+        const aiRec = getAIRecommendation(mode, selectedCondition, symptomValue, answers);
+        html += '<h3>2. AI-driven Recommendation (sent to physician)</h3>';
+        html += '<div class="row"><div class="value summary-ai-rec">' + escapeHtml(aiRec) + '</div></div>';
         $('summary-body').innerHTML = html;
       }
 
