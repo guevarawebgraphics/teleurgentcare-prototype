@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TeleUrgentCare — Patient Journey and Process Flow</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 1.5rem;
+    }
+    .readme-content {
+      max-width: 720px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    h1 { font-size: 1.5rem; margin: 0 0 1rem; font-weight: 700; }
+    h2 { font-size: 1.25rem; margin: 2rem 0 0.75rem; font-weight: 600; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.25rem; }
+    h2:first-of-type { margin-top: 0; }
+    h3 { font-size: 1.0625rem; margin: 1.25rem 0 0.5rem; font-weight: 600; }
+    p { margin: 0.5rem 0 1rem; }
+    ul, ol { margin: 0.5rem 0 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.35rem; }
+    strong { font-weight: 600; }
+    em { font-style: italic; }
+    hr { border: none; border-top: 1px solid #e5e7eb; margin: 1.5rem 0; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.9375rem;
+    }
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #f9fafb; font-weight: 600; }
+    tr:nth-child(even) { background: #fafafa; }
+    .mermaid { min-height: 120px; margin: 1rem 0; text-align: center; }
+    .readme-content a { color: #2563eb; text-decoration: underline; }
+    .back-link { display: inline-block; margin-bottom: 1rem; font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+  <main class="readme-content">
+    <a href="index.html" class="back-link">← Back to demo</a>
+
+    <h1>TeleUrgentCare / EasyConsult Platform — Patient Journey and Process Flow</h1>
+
+    <h2>1. Project Scope</h2>
+    <p><strong>In scope</strong></p>
+    <ul>
+      <li><strong>Patient journey:</strong> Steps, screens, decisions, and outcomes from first touch to physician response.</li>
+      <li><strong>Process flow:</strong> Intake stages, safety checks (red-flag engine), disposition types, and physician workflow as flow only.</li>
+      <li>High-level disposition and patient-facing messaging (e.g. emergency stop, urgent review).</li>
+    </ul>
+    <p><strong>Out of scope</strong></p>
+    <ul>
+      <li>Backend systems, APIs, databases, authentication, and infrastructure.</li>
+    </ul>
+
+    <hr>
+
+    <h2>2. Platform Overview</h2>
+    <p>The platform is an <strong>asynchronous telemedicine system</strong> used in the United States (similar to EasyConsult, K Health, Teladoc async). The patient submits structured medical information online without phone or video. A licensed physician reviews the case later (typical response within 2 hours). The <strong>AI acts only as an intake assistant</strong>: it asks questions, collects information, runs safety checks, and produces a physician-ready summary. The <strong>physician makes all clinical decisions</strong> (diagnosis, treatment, prescription). The AI does not diagnose or suggest treatment to the patient.</p>
+
+    <hr>
+
+    <h2>3. Patient Journey</h2>
+
+    <h3>Start</h3>
+    <ul>
+      <li>Patient accepts <strong>Terms and Conditions</strong> and confirms understanding that this is not emergency care and that care is asynchronous (no live phone or video).</li>
+      <li><strong>Eligibility:</strong> Age 18+, physically located in a state where the provider is licensed. If not met, the consultation cannot proceed.</li>
+    </ul>
+
+    <h3>Entry mode</h3>
+    <p>The patient chooses one of two paths:</p>
+    <table>
+      <thead><tr><th>Path</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Condition-based</strong></td><td>Patient selects a condition they believe they have (e.g. UTI, pink eye, yeast infection, acne). The system shows a short description and possible treatments, then the AI asks condition-specific questions.</td></tr>
+        <tr><td><strong>Symptom-based</strong></td><td>Patient selects one or more symptoms (e.g. cough, headache, rash, nausea). The AI asks follow-up questions based on the selected symptoms.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Intake (question flow)</h3>
+    <p>Questions are asked in a structured order:</p>
+    <ol>
+      <li><strong>Universal intake:</strong> Demographics (age, sex, state), medical history (conditions, medications, allergies, surgeries), pregnancy status, social factors (smoking, alcohol, drug use), prior treatment, recurrence, travel.</li>
+      <li><strong>Safety screen (Stage A):</strong> Universal danger screen <em>before</em> symptom/condition questions (e.g. severe chest pain, trouble breathing, stroke-like symptoms, severe bleeding, suicidal thoughts). Any “yes” triggers an immediate stop.</li>
+      <li><strong>Primary clinical block:</strong> Main complaint logic based on selected condition or symptoms.</li>
+      <li><strong>Associated symptom blocks:</strong> Only when relevant to the chief complaint.</li>
+      <li><strong>Modifier blocks:</strong> Pregnancy, STI exposure, chronic illness, travel, medication refill, mental health safety, photo upload when required.</li>
+      <li><strong>Safety block (Stage C):</strong> Final safety scan before submission. Red-flag rules run again (e.g. “worst headache of life,” cannot keep fluids down, throat swelling). If triggered, the patient cannot proceed to normal submission.</li>
+    </ol>
+    <p><strong>Stage B</strong> runs throughout: real-time stop/escalate logic during the question flow (e.g. stop if new red flag, escalate to urgent same-day review when appropriate).</p>
+
+    <h3>Photos</h3>
+    <p>For certain conditions (e.g. skin rash, acne, eye infections, cold sores, shingles), <strong>photo upload is required</strong>. The system typically requires 2–3 photos (good lighting, close-up and wider view). The consultation cannot proceed without required photos.</p>
+
+    <h3>Outcomes</h3>
+    <table>
+      <thead><tr><th>Outcome</th><th>What happens</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Emergency stop</strong></td><td>System shows: <em>“Your symptoms may indicate a medical emergency. This platform cannot safely manage this condition. Please go to the nearest emergency room or call emergency services immediately.”</em> Consultation stops.</td></tr>
+        <tr><td><strong>Urgent / same-day</strong></td><td>Case is marked for urgent physician review or in-person care recommended. Patient is informed as appropriate.</td></tr>
+        <tr><td><strong>Routine</strong></td><td>Case is submitted. AI generates a physician-ready summary (chief complaint, duration, symptoms, relevant positives/negatives, red flags checked/denied, medical history, suggested differentials/treatments/tests for physician only). <strong>No diagnosis or treatment is shown to the patient.</strong></td></tr>
+      </tbody>
+    </table>
+
+    <h3>After submission</h3>
+    <p>Patient waits for physician review. The physician reviews the summary, confirms or changes assessment, and may approve treatment, send a prescription, or send recommendations. The patient receives the <strong>physician’s</strong> diagnosis, prescription (if any), and recommendations. The AI does not give diagnosis or treatment advice to the patient.</p>
+
+    <hr>
+
+    <h3>Patient journey (diagram)</h3>
+    <div class="mermaid">
+flowchart LR
+  Terms[Terms and Conditions]
+  Eligibility[Eligibility Check]
+  EntryMode[Condition or Symptom]
+  Questions[AI Questions Stages A B C]
+  Photos[Photos if required]
+  Submit[Submit Case]
+  Stop[Emergency Stop]
+  Escalate[Urgent Escalate]
+  Physician[Physician Review]
+  Outcome[Diagnosis Prescription Recommendations]
+
+  Terms --> Eligibility
+  Eligibility --> EntryMode
+  EntryMode --> Questions
+  Questions --> Photos
+  Photos --> Submit
+  Questions --> Stop
+  Questions --> Escalate
+  Submit --> Physician
+  Physician --> Outcome
+    </div>
+
+    <hr>
+
+    <h2>4. Process Flow (No Backend)</h2>
+
+    <h3>High-level 7 steps</h3>
+    <ol>
+      <li>User agrees to Terms and Conditions.</li>
+      <li>User selects <strong>Condition</strong> or <strong>Symptoms</strong>.</li>
+      <li>AI asks medical questions (universal → symptom/condition blocks → modifiers; safety at Stages A, B, C).</li>
+      <li>User uploads photos if required.</li>
+      <li>AI generates medical summary (for physician only).</li>
+      <li>Doctor reviews case.</li>
+      <li>Doctor sends diagnosis, prescription (if applicable), and/or recommendations.</li>
+    </ol>
+
+    <h3>Decision engine layers (order only)</h3>
+    <table>
+      <thead><tr><th>Layer</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Universal intake (demographics, history, safety screen)</td></tr>
+        <tr><td>2</td><td>Entry mode (symptom vs condition)</td></tr>
+        <tr><td>3</td><td>Primary clinical block (main complaint)</td></tr>
+        <tr><td>4</td><td>Associated symptom blocks (when relevant)</td></tr>
+        <tr><td>5</td><td>Modifier blocks (pregnancy, travel, STI, refill, mental health, photo)</td></tr>
+        <tr><td>6</td><td>Safety block (final scan before submit)</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Disposition types (flow only)</h3>
+    <ul>
+      <li><strong>Routine async</strong> — Normal asynchronous physician review.</li>
+      <li><strong>Urgent same-day physician review</strong> — Prioritized for same-day review.</li>
+      <li><strong>In-person care advised</strong> — Patient directed to in-person care.</li>
+      <li><strong>Emergency stop</strong> — Consultation stopped; patient directed to ER/emergency services.</li>
+    </ul>
+
+    <h3>Physician side (workflow only)</h3>
+    <p><strong>Queues:</strong> New | Urgent | Awaiting clarification | Ready for prescribing | Completed | Escalated.</p>
+    <p><strong>Case view:</strong> Patient header, symptom/condition selected, AI summary, answers timeline, photo gallery, red-flag review, AI suggestions (differentials/treatments/tests), physician note editor, SOAP draft, prescription panel, patient message panel.</p>
+    <p><strong>Actions:</strong> Approve | Edit | Request more info | Prescribe | Send advice only | Recommend urgent care | Send ER message | Close case.</p>
+    <p><em>(No backend or schema details; workflow only. Source: TeleUrgentCare_Physician_Dashboard_Action_Status_Schema.xlsx.)</em></p>
+
+    <hr>
+
+    <h3>Process flow (diagram)</h3>
+    <div class="mermaid">
+flowchart TD
+  S1[Step 1 Accept T and C]
+  S2[Step 2 Select Condition or Symptoms]
+  S3[Step 3 AI asks medical questions]
+  S4[Step 4 Upload photos if needed]
+  S5[Step 5 AI generates summary]
+  S6[Step 6 Doctor reviews case]
+  S7[Step 7 Doctor sends diagnosis prescription recommendations]
+
+  S1 --> S2
+  S2 --> S3
+  S3 --> S4
+  S4 --> S5
+  S5 --> S6
+  S6 --> S7
+    </div>
+
+    <hr>
+
+    <h2>5. Safety and AI Role (Flow-Relevant Only)</h2>
+
+    <h3>Red-flag behavior</h3>
+    <ul>
+      <li>Red flags are evaluated in <strong>three stages:</strong> Stage A (before symptom/condition questions), Stage B (during question flow), Stage C (before submission).</li>
+      <li>If a red flag is triggered: consultation <strong>stops</strong> or is <strong>escalated</strong> (urgent same-day or in-person advised). The patient never receives a diagnosis or treatment from the AI.</li>
+    </ul>
+    <p><strong>Examples of hard stop (emergency):</strong> Severe chest pain, difficulty breathing, stroke-like symptoms (facial droop, weakness, trouble speaking), loss of consciousness, severe bleeding, vomiting/coughing blood, severe abdominal pain, severe allergic reaction (tongue/throat swelling), suicidal thoughts or thoughts of harming others, severe head injury, sudden paralysis, seizure, confusion or altered mental status, inability to swallow saliva, vision loss, severe eye pain, testicular torsion-like symptoms, heavy vaginal bleeding with dizziness, pregnancy with severe abdominal/pelvic pain or heavy bleeding.</p>
+    <p><strong>Emergency message to patient:</strong> <em>“Your symptoms may indicate a medical emergency. This platform cannot safely manage this condition. Please go to the nearest emergency room or call emergency services immediately.”</em></p>
+
+    <h3>AI role</h3>
+    <ul>
+      <li><strong>Does:</strong> Asks questions, collects structured history, detects danger early, stops or escalates when unsafe, requires photos when needed, creates a structured physician-ready summary (and internal clinical suggestions for the doctor only).</li>
+      <li><strong>Does not:</strong> Diagnose the patient, give treatment advice to the patient, or act as the doctor. The physician always makes the final decision.</li>
+    </ul>
+
+    <hr>
+
+    <h2>6. Source Documents</h2>
+    <table>
+      <thead><tr><th>Document</th><th>Role for patient journey and process flow</th></tr></thead>
+      <tbody>
+        <tr><td><strong>TUC + EASYCONSULT ALL-IN-0NE PLATFORM.pdf</strong></td><td>Full triage rules, decision engine layers 1–6, red-flag engine (Stages A/B/C), question blocks, physician dashboard flow, SOAP summary, disposition types.</td></tr>
+        <tr><td><strong>TUC + EASYCONSULT ALL-IN-0NE PLATFORM (1).pdf</strong></td><td>Simple 7-step platform flow, two entry modes (condition vs symptom), AI role, emergency message, photo requirements, prescription limitations.</td></tr>
+        <tr><td><strong>teleurgent_ai_question_bank (1).xlsx</strong></td><td>Question bank used along the patient journey (questions and logic).</td></tr>
+        <tr><td><strong>TeleUrgentCare_AI_Triage_Import_Pack.xlsx</strong></td><td>Triage/import pack; source for triage rules and questions.</td></tr>
+        <tr><td><strong>TeleUrgentCare_Physician_Dashboard_Action_Status_Schema.xlsx</strong></td><td>Physician dashboard action and status definitions; source for physician-side process flow (queues, case view, actions).</td></tr>
+      </tbody>
+    </table>
+
+    <hr>
+
+    <p><em>This README describes only the patient journey and process flow. Backend implementation is out of scope.</em></p>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</body>
+</html>
