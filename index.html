@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TeleUrgentCare — Condition & Symptoms (AI Assistant)</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      background: #f5f5f5;
+      color: #1a1a1a;
+    }
+    h1 { font-size: 1.25rem; margin: 0 0 0.5rem; }
+    .subtitle { color: #555; font-size: 0.875rem; margin-bottom: 1.5rem; }
+    section {
+      background: #fff;
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .entry-buttons { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .entry-buttons button {
+      flex: 1;
+      min-width: 140px;
+      padding: 1rem 1.25rem;
+      font-size: 1rem;
+      border: 2px solid #2563eb;
+      background: #fff;
+      color: #2563eb;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .entry-buttons button:hover { background: #eff6ff; }
+    ul.option-list { list-style: none; padding: 0; margin: 0; }
+    ul.option-list li { margin-bottom: 0.5rem; }
+    ul.option-list button {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border: 1px solid #e5e7eb;
+      background: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9375rem;
+    }
+    ul.option-list button:hover { background: #f9fafb; border-color: #2563eb; }
+    .description { font-size: 0.875rem; color: #374151; margin: 1rem 0; line-height: 1.5; }
+    .treatments { font-size: 0.8125rem; color: #6b7280; margin: 0.75rem 0; }
+    .treatments strong { color: #374151; }
+    .question-label { font-weight: 500; margin-bottom: 0.5rem; display: block; }
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    .yes-no { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+    .yes-no button {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .yes-no button.selected { background: #2563eb; color: #fff; border-color: #2563eb; }
+    .nav { display: flex; gap: 0.5rem; margin-top: 1rem; }
+    .nav button {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: none;
+      font-size: 0.9375rem;
+      cursor: pointer;
+    }
+    .nav .primary { background: #2563eb; color: #fff; }
+    .nav .secondary { background: #e5e7eb; color: #374151; }
+    .summary pre { font-size: 0.8125rem; background: #f9fafb; padding: 1rem; border-radius: 6px; overflow: auto; white-space: pre-wrap; }
+    .summary-note { font-size: 0.8125rem; color: #6b7280; margin-top: 0.75rem; }
+    .summary-friendly { background: #f9fafb; border-radius: 8px; padding: 1rem; margin-top: 0.75rem; font-size: 0.9375rem; }
+    .summary-friendly .row { margin-bottom: 0.75rem; }
+    .summary-friendly .label { color: #6b7280; font-size: 0.8125rem; margin-bottom: 0.15rem; }
+    .summary-friendly .value { font-weight: 500; }
+    .summary-friendly h3 { font-size: 0.9375rem; margin: 1rem 0 0.5rem; color: #374151; }
+    .summary-friendly h3:first-child { margin-top: 0; }
+    .hidden { display: none; }
+    .photo-required { font-size: 0.8125rem; color: #b45309; margin-top: 0.25rem; }
+    /* Symptom AI Chat */
+    .chat-container { display: flex; flex-direction: column; height: 420px; }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.5rem 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .chat-msg { max-width: 85%; padding: 0.6rem 0.9rem; border-radius: 12px; font-size: 0.9375rem; line-height: 1.4; }
+    .chat-msg.ai { align-self: flex-start; background: #e0e7ff; color: #1e3a8a; }
+    .chat-msg.user { align-self: flex-end; background: #2563eb; color: #fff; }
+    .chat-msg .role { font-size: 0.7rem; text-transform: uppercase; opacity: 0.8; margin-bottom: 0.25rem; }
+    .chat-input-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+    .chat-input-row input { flex: 1; }
+    .chat-input-row button { padding: 0.5rem 1rem; border-radius: 6px; border: none; background: #2563eb; color: #fff; cursor: pointer; }
+    /* Condition billing */
+    .billing-fee { font-size: 1.25rem; font-weight: 600; color: #1e3a8a; margin: 0.5rem 0 1rem; }
+    .billing-form .field { margin-bottom: 1rem; }
+    .billing-form label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.25rem; color: #374151; }
+    .billing-form input[type="email"] { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem; }
+    .billing-form .demo-note { font-size: 0.8125rem; color: #6b7280; margin-top: 0.25rem; }
+    .billing-actions { margin-top: 1.25rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <h1>TeleUrgentCare — AI Assistant</h1>
+  <p class="subtitle">Condition-based or symptom-based intake (project scope demo)</p>
+
+  <!-- Entry: Condition vs Symptoms -->
+  <section id="entry" class="screen">
+    <p><strong>How would you like to start?</strong></p>
+    <div class="entry-buttons">
+      <button type="button" data-mode="condition">Condition</button>
+      <button type="button" data-mode="symptom">Symptoms</button>
+    </div>
+    <p class="description">Choose a condition you think you have, or describe your symptoms.</p>
+  </section>
+
+  <!-- Condition list -->
+  <section id="condition-list" class="screen hidden">
+    <p><strong>Select a condition</strong></p>
+    <ul class="option-list" id="condition-options"></ul>
+    <button type="button" class="nav secondary" id="back-from-conditions">Back</button>
+  </section>
+
+  <!-- Condition detail (description + treatments) -->
+  <section id="condition-detail" class="screen hidden">
+    <p><strong id="condition-detail-name"></strong></p>
+    <p class="description" id="condition-detail-desc"></p>
+    <p class="treatments"><strong>Possible treatments (physician will decide):</strong><br><span id="condition-detail-treatments"></span></p>
+    <p class="photo-required" id="condition-photo-note"></p>
+    <button type="button" class="nav primary" id="start-condition-questions">Continue to questions</button>
+    <button type="button" class="nav secondary" id="back-from-condition-detail">Back</button>
+  </section>
+
+  <!-- Symptom list -->
+  <section id="symptom-list" class="screen hidden">
+    <p><strong>Select one or more symptoms</strong></p>
+    <ul class="option-list" id="symptom-options"></ul>
+    <button type="button" class="nav primary" id="start-symptom-chat" disabled>Start AI Chat</button>
+    <button type="button" class="nav secondary" id="back-from-symptoms">Back</button>
+  </section>
+
+  <!-- Symptom: AI Chat -->
+  <section id="symptom-chat" class="screen hidden">
+    <p><strong>Symptom-based intake — AI Chat</strong></p>
+    <div class="chat-container">
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="Type your answer..." />
+        <button type="button" id="chat-send">Send</button>
+      </div>
+    </div>
+    <button type="button" class="nav secondary" id="back-from-chat" style="margin-top:0.5rem">Back</button>
+    <button type="button" class="nav primary hidden" id="chat-finish" style="margin-top:0.5rem">Finish and see summary</button>
+  </section>
+
+  <!-- Questions (condition only) -->
+  <section id="questions" class="screen hidden">
+    <p><strong>AI Assistant questions</strong> <span id="question-progress"></span></p>
+    <p class="question-label" id="question-text"></p>
+    <div id="question-input"></div>
+    <div class="nav">
+      <button type="button" class="nav primary" id="next-question">Next</button>
+      <button type="button" class="nav secondary" id="back-from-question">Back</button>
+    </div>
+  </section>
+
+  <!-- Condition: Billing & Payment (condition-based only) -->
+  <section id="condition-billing" class="screen hidden">
+    <p><strong>Billing & payment</strong></p>
+    <p class="description">Consultation fee for this condition-based visit.</p>
+    <p class="billing-fee" id="billing-fee-amount">$49.99</p>
+    <form id="billing-form" class="billing-form" novalidate>
+      <div class="field">
+        <label for="billing-name">Billing name</label>
+        <input type="text" id="billing-name" placeholder="Full name" required />
+      </div>
+      <div class="field">
+        <label for="billing-email">Email</label>
+        <input type="email" id="billing-email" placeholder="you@example.com" required />
+      </div>
+      <div class="field">
+        <label for="billing-address">Billing address</label>
+        <input type="text" id="billing-address" placeholder="Street, city, state, ZIP" />
+      </div>
+      <p class="demo-note">Payment method (demo only — no real charge).</p>
+    </form>
+    <div class="billing-actions">
+      <button type="button" class="nav primary" id="proceed-to-payment">Proceed to Payment — $49.99</button>
+      <button type="button" class="nav secondary" id="back-from-billing">Back</button>
+    </div>
+  </section>
+
+  <!-- Summary -->
+  <section id="summary" class="screen hidden">
+    <p><strong>Intake summary</strong></p>
+    <p class="summary-note">This summary would be sent to the physician. The AI does not diagnose or recommend treatment to you.</p>
+    <div id="summary-body" class="summary-friendly"></div>
+    <button type="button" class="nav secondary" id="start-over" style="margin-top:1rem">Start over</button>
+  </section>
+
+  <script>
+    (function () {
+      let conditionsData = { conditions: [] };
+      let symptomsData = { symptoms: [] };
+      let mode = null; // 'condition' | 'symptom'
+      let selectedCondition = null;
+      let selectedSymptoms = [];
+      let currentQuestions = [];
+      let questionIndex = 0;
+      let answers = {};
+      let billingDetails = {};
+
+      const $ = (id) => document.getElementById(id);
+      const show = (id) => document.querySelectorAll('.screen').forEach(el => { el.classList.add('hidden'); });
+      const showScreen = (id) => {
+        document.querySelectorAll('.screen').forEach(el => el.classList.add('hidden'));
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('hidden');
+      };
+
+      function loadData() {
+        return Promise.all([
+          fetch('data/conditions.json').then(r => r.json()),
+          fetch('data/symptoms.json').then(r => r.json())
+        ]).then(([c, s]) => {
+          conditionsData = c;
+          symptomsData = s;
+        });
+      }
+
+      // --- Entry ---
+      document.querySelectorAll('#entry [data-mode]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          mode = btn.getAttribute('data-mode');
+          if (mode === 'condition') {
+            renderConditionList();
+            showScreen('condition-list');
+          } else {
+            selectedSymptoms = [];
+            startSymptomChat();
+          }
+        });
+      });
+
+      function renderConditionList() {
+        const ul = $('condition-options');
+        ul.innerHTML = conditionsData.conditions.map(c =>
+          `<li><button type="button" data-id="${c.id}">${c.name}</button></li>`
+        ).join('');
+        ul.querySelectorAll('button').forEach(btn => {
+          btn.addEventListener('click', () => {
+            selectedCondition = conditionsData.conditions.find(c => c.id === btn.getAttribute('data-id'));
+            if (!selectedCondition) return;
+            $('condition-detail-name').textContent = selectedCondition.name;
+            $('condition-detail-desc').textContent = selectedCondition.description;
+            $('condition-detail-treatments').textContent = selectedCondition.possibleTreatments.join('; ');
+            $('condition-photo-note').textContent = selectedCondition.photoRequired
+              ? 'Photo upload will be required before submission (demo: skipped).'
+              : '';
+            $('condition-photo-note').classList.toggle('hidden', !selectedCondition.photoRequired);
+            showScreen('condition-detail');
+          });
+        });
+      }
+
+      $('back-from-conditions').addEventListener('click', () => { showScreen('entry'); });
+      $('start-condition-questions').addEventListener('click', () => {
+        currentQuestions = selectedCondition ? selectedCondition.questions : [];
+        questionIndex = 0;
+        answers = {};
+        runQuestions();
+      });
+      $('back-from-condition-detail').addEventListener('click', () => showScreen('condition-list'));
+
+      function renderSymptomList() {
+        const ul = $('symptom-options');
+        ul.innerHTML = symptomsData.symptoms.map(s =>
+          `<li><button type="button" data-id="${s.id}">${s.name}</button></li>`
+        ).join('');
+        ul.querySelectorAll('button').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-id');
+            const idx = selectedSymptoms.indexOf(id);
+            if (idx === -1) selectedSymptoms.push(id);
+            else selectedSymptoms.splice(idx, 1);
+            btn.classList.toggle('selected', selectedSymptoms.includes(id));
+            $('start-symptom-chat').disabled = selectedSymptoms.length === 0;
+          });
+        });
+        selectedSymptoms = [];
+        $('start-symptom-chat').disabled = true;
+      }
+
+      $('back-from-symptoms').addEventListener('click', () => { showScreen('entry'); });
+
+      // --- Symptom AI Chat (knowledge base + question flow) ---
+      let chatQuestionIndex = 0;
+
+      function appendChatMessage(role, text) {
+        const wrap = $('chat-messages');
+        const div = document.createElement('div');
+        div.className = 'chat-msg ' + role;
+        div.innerHTML = '<div class="role">' + (role === 'ai' ? 'AI Assistant' : 'You') + '</div>' + escapeHtml(text);
+        wrap.appendChild(div);
+        wrap.scrollTop = wrap.scrollHeight;
+      }
+      function escapeHtml(s) {
+        const p = document.createElement('p');
+        p.textContent = s;
+        return p.innerHTML;
+      }
+
+      function startSymptomChat() {
+        const symptoms = selectedSymptoms.length
+          ? symptomsData.symptoms.filter(s => selectedSymptoms.includes(s.id))
+          : symptomsData.symptoms;
+        const seen = new Set();
+        currentQuestions = [];
+        if (selectedSymptoms.length === 0) {
+          currentQuestions.push({ id: 'opening', text: 'What symptoms are you experiencing today?', type: 'text', summaryKey: 'symptoms_description' });
+        }
+        symptoms.forEach(s => {
+          (s.questions || []).forEach(q => {
+            if (!seen.has(q.id)) { seen.add(q.id); currentQuestions.push(q); }
+          });
+        });
+        chatQuestionIndex = 0;
+        answers = {};
+        showScreen('symptom-chat');
+        $('chat-messages').innerHTML = '';
+        $('chat-finish').classList.add('hidden');
+        appendChatMessage('ai', 'I\'m your intake assistant. Describe your symptoms and I\'ll ask a few follow-up questions. I don\'t diagnose or recommend treatment—a physician will review your answers.');
+        if (currentQuestions.length > 0) {
+          appendChatMessage('ai', currentQuestions[0].text);
+        } else {
+          appendChatMessage('ai', 'I have enough information. You can finish and see your summary.');
+          $('chat-finish').classList.remove('hidden');
+        }
+        $('chat-input').value = '';
+        $('chat-input').focus();
+      }
+
+      $('start-symptom-chat').addEventListener('click', startSymptomChat);
+
+      function sendChatMessage() {
+        const input = $('chat-input');
+        const text = (input.value || '').trim();
+        if (!text) return;
+        appendChatMessage('user', text);
+        input.value = '';
+        const key = currentQuestions[chatQuestionIndex] ? (currentQuestions[chatQuestionIndex].summaryKey || currentQuestions[chatQuestionIndex].id) : null;
+        if (key != null) answers[key] = text;
+        chatQuestionIndex++;
+        if (chatQuestionIndex >= currentQuestions.length) {
+          appendChatMessage('ai', 'I have enough information. You can finish and see your summary below.');
+          $('chat-finish').classList.remove('hidden');
+          return;
+        }
+        appendChatMessage('ai', currentQuestions[chatQuestionIndex].text);
+        input.focus();
+      }
+
+      $('chat-send').addEventListener('click', sendChatMessage);
+      $('chat-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); sendChatMessage(); } });
+      $('back-from-chat').addEventListener('click', () => { showScreen('entry'); });
+      $('chat-finish').addEventListener('click', () => { showSummary(); });
+
+      function runQuestions() {
+        showScreen('questions');
+        renderQuestion();
+      }
+
+      function renderQuestion() {
+        if (questionIndex >= currentQuestions.length) {
+          if (mode === 'condition') showBilling();
+          else showSummary();
+          return;
+        }
+        const q = currentQuestions[questionIndex];
+        $('question-progress').textContent = `(${questionIndex + 1} of ${currentQuestions.length})`;
+        $('question-text').textContent = q.text;
+        const container = $('question-input');
+        container.innerHTML = '';
+        const key = q.summaryKey || q.id;
+
+        if (q.type === 'yes_no') {
+          const div = document.createElement('div');
+          div.className = 'yes-no';
+          ['Yes', 'No'].forEach(label => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.textContent = label;
+            b.dataset.value = label.toLowerCase();
+            if (answers[key] === b.dataset.value) b.classList.add('selected');
+            b.addEventListener('click', () => {
+              container.querySelectorAll('button').forEach(x => x.classList.remove('selected'));
+              b.classList.add('selected');
+              answers[key] = b.dataset.value;
+            });
+            div.appendChild(b);
+          });
+          container.appendChild(div);
+        } else if (q.type === 'select') {
+          const sel = document.createElement('select');
+          sel.dataset.key = key;
+          const opt = document.createElement('option');
+          opt.value = '';
+          opt.textContent = '— Select —';
+          sel.appendChild(opt);
+          (q.options || []).forEach(optVal => {
+            const o = document.createElement('option');
+            o.value = optVal;
+            o.textContent = optVal;
+            if (answers[key] === optVal) o.selected = true;
+            sel.appendChild(o);
+          });
+          sel.addEventListener('change', () => { answers[key] = sel.value; });
+          container.appendChild(sel);
+        } else {
+          const input = document.createElement('input');
+          input.type = q.type === 'number' ? 'number' : 'text';
+          input.dataset.key = key;
+          input.placeholder = q.type === 'number' ? '0–10' : 'Your answer';
+          if (answers[key] != null) input.value = answers[key];
+          input.addEventListener('input', () => { answers[key] = input.value; });
+          container.appendChild(input);
+        }
+      }
+
+      $('next-question').addEventListener('click', () => {
+        const q = currentQuestions[questionIndex];
+        const key = q.summaryKey || q.id;
+        const input = $('question-input').querySelector('[data-key="' + key + '"]') || $('question-input').querySelector('input, select');
+        if (input && 'value' in input) answers[key] = input.value;
+        if (q.type === 'yes_no' && (answers[key] == null || answers[key] === '')) return;
+        questionIndex++;
+        renderQuestion();
+      });
+
+      $('back-from-question').addEventListener('click', () => {
+        if (questionIndex > 0) {
+          questionIndex--;
+          renderQuestion();
+        } else showScreen('condition-detail');
+      });
+
+      function showBilling() {
+        showScreen('condition-billing');
+        $('billing-form').reset();
+        billingDetails = {};
+      }
+
+      $('proceed-to-payment').addEventListener('click', () => {
+        const name = ($('billing-name').value || '').trim();
+        const email = ($('billing-email').value || '').trim();
+        const address = ($('billing-address').value || '').trim();
+        if (!name) { $('billing-name').focus(); return; }
+        if (!email) { $('billing-email').focus(); return; }
+        billingDetails = { name, email, address, fee: '49.99' };
+        showSummary();
+      });
+
+      $('back-from-billing').addEventListener('click', () => {
+        questionIndex = currentQuestions.length - 1;
+        showScreen('questions');
+        renderQuestion();
+      });
+
+      function humanizeKey(key) {
+        return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      }
+
+      function showSummary() {
+        showScreen('summary');
+        const symptomValue = selectedSymptoms.length
+          ? symptomsData.symptoms.filter(s => selectedSymptoms.includes(s.id)).map(s => s.name).join(', ')
+          : (answers.symptoms_description || 'Described in chat');
+        const entry = mode === 'condition'
+          ? { type: 'Condition', value: selectedCondition ? selectedCondition.name : '' }
+          : { type: 'Symptoms', value: symptomValue };
+        let html = '';
+        html += '<h3>Consultation type</h3><div class="row"><div class="label">Type</div><div class="value">' + escapeHtml(entry.type) + '</div></div>';
+        html += '<div class="row"><div class="label">Selected</div><div class="value">' + escapeHtml(entry.value) + '</div></div>';
+        if (mode === 'condition' && billingDetails && (billingDetails.name || billingDetails.email)) {
+          html += '<h3>Billing & payment</h3>';
+          html += '<div class="row"><div class="label">Consultation fee</div><div class="value">$49.99</div></div>';
+          if (billingDetails.name) html += '<div class="row"><div class="label">Billing name</div><div class="value">' + escapeHtml(billingDetails.name) + '</div></div>';
+          if (billingDetails.email) html += '<div class="row"><div class="label">Email</div><div class="value">' + escapeHtml(billingDetails.email) + '</div></div>';
+          if (billingDetails.address) html += '<div class="row"><div class="label">Billing address</div><div class="value">' + escapeHtml(billingDetails.address) + '</div></div>';
+        }
+        if (Object.keys(answers).length > 0) {
+          html += '<h3>Your answers</h3>';
+          for (const key in answers) {
+            const val = answers[key];
+            if (val == null || val === '') continue;
+            html += '<div class="row"><div class="label">' + escapeHtml(humanizeKey(key)) + '</div><div class="value">' + escapeHtml(String(val)) + '</div></div>';
+          }
+        }
+        $('summary-body').innerHTML = html;
+      }
+
+      $('start-over').addEventListener('click', () => {
+        mode = null;
+        selectedCondition = null;
+        selectedSymptoms = [];
+        billingDetails = {};
+        showScreen('entry');
+      });
+
+      loadData().catch(() => {
+        $('entry').innerHTML += '<p style="color:#b91c1c;">Could not load data. Serve this folder via a web server (e.g. open from http://localhost).</p>';
+      });
+    })();
+  </script>
+</body>
+</html>

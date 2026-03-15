@@ -1,0 +1,72 @@
+{
+  "conditions": [
+    {
+      "id": "uti",
+      "name": "Urinary tract infection (UTI)",
+      "description": "Infection in the urinary system, often causing painful urination, urgency, and frequency.",
+      "possibleTreatments": ["Antibiotics (e.g. nitrofurantoin, TMP-SMX)", "Pain relief (e.g. phenazopyridine)", "Urine culture if symptoms persist"],
+      "photoRequired": false,
+      "questions": [
+        { "id": "uti_1", "text": "When did your symptoms start?", "type": "text", "summaryKey": "duration" },
+        { "id": "uti_2", "text": "Do you have pain or burning when urinating?", "type": "yes_no", "summaryKey": "painful_urination" },
+        { "id": "uti_3", "text": "Do you have fever?", "type": "yes_no", "summaryKey": "fever" },
+        { "id": "uti_4", "text": "Do you have back pain or flank pain?", "type": "yes_no", "summaryKey": "flank_pain" },
+        { "id": "uti_5", "text": "Could you be pregnant?", "type": "yes_no", "summaryKey": "pregnancy_status" }
+      ]
+    },
+    {
+      "id": "pink_eye",
+      "name": "Pink eye (conjunctivitis)",
+      "description": "Inflammation of the conjunctiva causing redness, discharge, or itching in one or both eyes.",
+      "possibleTreatments": ["Antibiotic or antiviral eye drops (if indicated)", "Cool compresses", "Artificial tears"],
+      "photoRequired": true,
+      "questions": [
+        { "id": "eye_1", "text": "When did the eye problem begin?", "type": "text", "summaryKey": "onset" },
+        { "id": "eye_2", "text": "Is it one eye or both eyes?", "type": "select", "options": ["One eye", "Both eyes"], "summaryKey": "one_or_both" },
+        { "id": "eye_3", "text": "Do you have discharge? What color?", "type": "select", "options": ["None", "Clear", "Yellow/green", "White"], "summaryKey": "discharge" },
+        { "id": "eye_4", "text": "Do you wear contact lenses?", "type": "yes_no", "summaryKey": "contact_lenses" },
+        { "id": "eye_5", "text": "Please upload 2 clear photos of the affected eye(s). (Demo: no upload)", "type": "text", "summaryKey": "photos_note" }
+      ]
+    },
+    {
+      "id": "yeast_infection",
+      "name": "Yeast infection",
+      "description": "Fungal infection often causing itching, discharge, and discomfort in the vaginal area.",
+      "possibleTreatments": ["Antifungal cream or suppositories", "Oral antifungal (if indicated)"],
+      "photoRequired": false,
+      "questions": [
+        { "id": "yeast_1", "text": "When did symptoms begin?", "type": "text", "summaryKey": "onset" },
+        { "id": "yeast_2", "text": "Do you have itching or irritation?", "type": "yes_no", "summaryKey": "itching" },
+        { "id": "yeast_3", "text": "Do you have unusual discharge?", "type": "yes_no", "summaryKey": "discharge" },
+        { "id": "yeast_4", "text": "Have you had this before?", "type": "yes_no", "summaryKey": "recurrence" },
+        { "id": "yeast_5", "text": "Could you be pregnant?", "type": "yes_no", "summaryKey": "pregnancy_status" }
+      ]
+    },
+    {
+      "id": "acne",
+      "name": "Acne",
+      "description": "Skin condition with pimples, blackheads, or cysts, often on face, chest, or back.",
+      "possibleTreatments": ["Topical retinoids or benzoyl peroxide", "Antibiotic cream or oral (if indicated)", "Lifestyle and skincare advice"],
+      "photoRequired": true,
+      "questions": [
+        { "id": "acne_1", "text": "How long have you had acne or flare-ups?", "type": "text", "summaryKey": "duration" },
+        { "id": "acne_2", "text": "Where is it mainly located?", "type": "select", "options": ["Face", "Chest", "Back", "Face and body"], "summaryKey": "location" },
+        { "id": "acne_3", "text": "Have you tried any treatments before?", "type": "text", "summaryKey": "prior_treatment" },
+        { "id": "acne_4", "text": "Please upload 2–3 photos (close-up and wider view). (Demo: no upload)", "type": "text", "summaryKey": "photos_note" }
+      ]
+    },
+    {
+      "id": "sinus",
+      "name": "Sinus infection",
+      "description": "Infection or inflammation of the sinuses, often with facial pressure, congestion, and headache.",
+      "possibleTreatments": ["Decongestants", "Nasal saline", "Antibiotics if bacterial (physician decision)"],
+      "photoRequired": false,
+      "questions": [
+        { "id": "sinus_1", "text": "When did symptoms start?", "type": "text", "summaryKey": "onset" },
+        { "id": "sinus_2", "text": "Do you have facial pain or pressure?", "type": "yes_no", "summaryKey": "facial_pain" },
+        { "id": "sinus_3", "text": "What color is your nasal discharge?", "type": "select", "options": ["Clear", "Yellow", "Green", "None"], "summaryKey": "discharge" },
+        { "id": "sinus_4", "text": "Do you have fever?", "type": "yes_no", "summaryKey": "fever" }
+      ]
+    }
+  ]
+}

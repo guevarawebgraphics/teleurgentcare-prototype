@@ -1,0 +1,58 @@
+{
+  "symptoms": [
+    {
+      "id": "cough",
+      "name": "Cough",
+      "questions": [
+        { "id": "cough_1", "text": "How long have you had the cough?", "type": "text", "summaryKey": "duration" },
+        { "id": "cough_2", "text": "Is it dry or with mucus?", "type": "select", "options": ["Dry", "With mucus"], "summaryKey": "dry_or_mucus" },
+        { "id": "cough_3", "text": "Do you have fever?", "type": "yes_no", "summaryKey": "fever" },
+        { "id": "cough_4", "text": "Do you have chest pain?", "type": "yes_no", "summaryKey": "chest_pain" },
+        { "id": "cough_5", "text": "Do you smoke?", "type": "yes_no", "summaryKey": "smoking" }
+      ]
+    },
+    {
+      "id": "headache",
+      "name": "Headache",
+      "questions": [
+        { "id": "head_1", "text": "When did the headache begin?", "type": "text", "summaryKey": "onset" },
+        { "id": "head_2", "text": "Was it sudden or gradual?", "type": "select", "options": ["Sudden", "Gradual"], "summaryKey": "sudden_or_gradual" },
+        { "id": "head_3", "text": "Rate the pain from 1 to 10.", "type": "number", "summaryKey": "severity" },
+        { "id": "head_4", "text": "Do you have nausea or vomiting?", "type": "yes_no", "summaryKey": "nausea_vomiting" },
+        { "id": "head_5", "text": "Do you have fever or neck stiffness?", "type": "yes_no", "summaryKey": "fever_neck_stiffness" }
+      ]
+    },
+    {
+      "id": "rash",
+      "name": "Rash",
+      "questions": [
+        { "id": "rash_1", "text": "When did the rash start?", "type": "text", "summaryKey": "onset" },
+        { "id": "rash_2", "text": "Where is the rash located?", "type": "text", "summaryKey": "location" },
+        { "id": "rash_3", "text": "Is it itchy?", "type": "yes_no", "summaryKey": "itchy" },
+        { "id": "rash_4", "text": "Do you have fever or facial swelling?", "type": "yes_no", "summaryKey": "fever_facial_swelling" },
+        { "id": "rash_5", "text": "Please upload 2–3 photos. (Demo: no upload)", "type": "text", "summaryKey": "photos_note" }
+      ]
+    },
+    {
+      "id": "nausea",
+      "name": "Nausea",
+      "questions": [
+        { "id": "nausea_1", "text": "When did the nausea begin?", "type": "text", "summaryKey": "onset" },
+        { "id": "nausea_2", "text": "Have you vomited? If so, how many times?", "type": "text", "summaryKey": "vomiting" },
+        { "id": "nausea_3", "text": "Can you keep fluids down?", "type": "yes_no", "summaryKey": "keeps_fluids_down" },
+        { "id": "nausea_4", "text": "Do you have severe abdominal pain?", "type": "yes_no", "summaryKey": "abdominal_pain" },
+        { "id": "nausea_5", "text": "Could you be pregnant?", "type": "yes_no", "summaryKey": "pregnancy_status" }
+      ]
+    },
+    {
+      "id": "sore_throat",
+      "name": "Sore throat",
+      "questions": [
+        { "id": "throat_1", "text": "When did the sore throat begin?", "type": "text", "summaryKey": "onset" },
+        { "id": "throat_2", "text": "Rate the pain from 1 to 10.", "type": "number", "summaryKey": "severity" },
+        { "id": "throat_3", "text": "Do you have fever or cough?", "type": "yes_no", "summaryKey": "fever_cough" },
+        { "id": "throat_4", "text": "Is it painful to swallow? Can you swallow liquids?", "type": "yes_no", "summaryKey": "swallowing" }
+      ]
+    }
+  ]
+}
