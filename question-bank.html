@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Question topics — TeleUrgentCare</title>
+  <link rel="stylesheet" href="assets/prototype-theme.css">
+  <style>
+    body.qb-page.prototype-body.page-wide {
+      max-width: 42rem;
+    }
+    section.topic-section { margin-bottom: 1rem; }
+    details.topic-acc {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      margin-bottom: 0.5rem;
+      box-shadow: var(--shadow-card);
+    }
+    details.topic-acc summary {
+      padding: 0.85rem 1rem;
+      cursor: pointer;
+      font-weight: 600;
+      color: #334155;
+      list-style: none;
+    }
+    details.topic-acc summary::-webkit-details-marker { display: none; }
+    details.topic-acc[open] summary { border-bottom: 1px solid var(--color-border); }
+    .topic-body { padding: 0 1rem 1rem; }
+    table.q-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .q-table th, .q-table td { border: 1px solid var(--color-border); padding: 0.5rem 0.6rem; text-align: left; vertical-align: top; }
+    .q-table th { background: #f8fafc; font-weight: 600; font-size: 0.75rem; }
+    .q-table tr:nth-child(even) { background: #fafafa; }
+    .toggle-row { margin: 1rem 0; font-size: 0.875rem; }
+    .toggle-row label { cursor: pointer; user-select: none; }
+    .err { color: #b91c1c; font-size: 0.875rem; }
+    /* Content from data/conditions.json and data/symptoms.json — reference for patients and team. */
+  </style>
+</head>
+<body class="prototype-body page-wide shell-clinician qb-page">
+  <div class="prototype-banner">
+    <div>Prototype for feedback — not for medical use or emergency care.</div>
+    <div class="prototype-banner__hub"><a href="prototype-hub.html">All prototype pages</a></div>
+  </div>
+
+  <p class="shell-label">Clinician view (prototype)</p>
+
+  <header class="app-header">
+    <h1>Question topics (reference)</h1>
+    <p class="tagline">Example intake questions by condition or symptom (from local data files). Use with the <strong>Inbox</strong> when walking through a case.</p>
+  </header>
+
+  <nav class="nav-strip" aria-label="Clinician">
+    <a href="physician-dashboard.html">Inbox</a>
+    <a href="question-bank.html">Question topics</a>
+    <a href="index.html">Patient intake (preview)</a>
+    <a href="prototype-hub.html">All prototype pages</a>
+  </nav>
+
+  <div class="toggle-row">
+    <label><input type="checkbox" id="show-ids" /> Show technical IDs (for product team)</label>
+  </div>
+
+  <section class="topic-section card">
+    <h2 style="font-size:1.0625rem;margin:0 0 0.75rem;color:#1e3a8a">When you pick a condition</h2>
+    <div id="condition-bank"></div>
+  </section>
+  <section class="topic-section card">
+    <h2 style="font-size:1.0625rem;margin:0 0 0.75rem;color:#1e3a8a">When you pick symptoms</h2>
+    <div id="symptom-bank"></div>
+  </section>
+
+  <script>
+    (function () {
+      var showIds = false;
+
+      function escapeHtml(s) {
+        var p = document.createElement('p');
+        p.textContent = s;
+        return p.innerHTML;
+      }
+
+      function humanType(t) {
+        var x = (t || 'text').toLowerCase();
+        if (x === 'yes_no') return 'Yes / No';
+        if (x === 'select') return 'Choose one';
+        if (x === 'number') return 'Number (e.g. 1–10)';
+        return 'Short text';
+      }
+
+      function renderConditionSection(data) {
+        var el = document.getElementById('condition-bank');
+        if (!data.conditions || !data.conditions.length) {
+          el.innerHTML = '<p class="err">Nothing loaded.</p>';
+          return;
+        }
+        el.innerHTML = data.conditions.map(function (c) {
+          var rows = (c.questions || []).map(function (q) {
+            var idCell = showIds ? '<td><code>' + escapeHtml(q.id || '') + '</code></td>' : '';
+            return '<tr><td>' + escapeHtml(humanType(q.type)) + '</td><td>' + escapeHtml(q.text) + '</td>' + idCell + '</tr>';
+          }).join('');
+          var headExtra = showIds ? '<th scope="col">ID</th>' : '';
+          var table = '<table class="q-table"><thead><tr><th scope="col">Answer type</th><th scope="col">Question</th>' + headExtra + '</tr></thead><tbody>' + rows + '</tbody></table>';
+          return '<details class="topic-acc" open><summary>' + escapeHtml(c.name) + '</summary><div class="topic-body">' + table + '</div></details>';
+        }).join('');
+      }
+
+      function renderSymptomSection(data) {
+        var el = document.getElementById('symptom-bank');
+        if (!data.symptoms || !data.symptoms.length) {
+          el.innerHTML = '<p class="err">Nothing loaded.</p>';
+          return;
+        }
+        el.innerHTML = data.symptoms.map(function (s) {
+          var rows = (s.questions || []).map(function (q) {
+            var idCell = showIds ? '<td><code>' + escapeHtml(q.id || '') + '</code></td>' : '';
+            return '<tr><td>' + escapeHtml(humanType(q.type)) + '</td><td>' + escapeHtml(q.text) + '</td>' + idCell + '</tr>';
+          }).join('');
+          var headExtra = showIds ? '<th scope="col">ID</th>' : '';
+          var table = '<table class="q-table"><thead><tr><th scope="col">Answer type</th><th scope="col">Question</th>' + headExtra + '</tr></thead><tbody>' + rows + '</tbody></table>';
+          return '<details class="topic-acc"><summary>' + escapeHtml(s.name) + '</summary><div class="topic-body">' + table + '</div></details>';
+        }).join('');
+      }
+
+      function renderAll(cData, sData) {
+        renderConditionSection(cData);
+        renderSymptomSection(sData);
+      }
+
+      var cStore;
+      var sStore;
+      Promise.all([
+        fetch('data/conditions.json').then(function (r) { return r.json(); }),
+        fetch('data/symptoms.json').then(function (r) { return r.json(); })
+      ]).then(function (results) {
+        cStore = results[0];
+        sStore = results[1];
+        renderAll(cStore, sStore);
+        document.getElementById('show-ids').addEventListener('change', function () {
+          showIds = this.checked;
+          renderAll(cStore, sStore);
+        });
+      }).catch(function () {
+        document.getElementById('condition-bank').innerHTML = '<p class="err">Could not load topics. Open this site from a local web address (e.g. http://localhost).</p>';
+        document.getElementById('symptom-bank').innerHTML = '';
+      });
+    })();
+  </script>
+</body>
+</html>

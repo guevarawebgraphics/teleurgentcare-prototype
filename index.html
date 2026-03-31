@@ -3,96 +3,96 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TeleUrgentCare — Condition & Symptoms (AI Assistant)</title>
+  <title>Start a visit — TeleUrgentCare</title>
+  <link rel="stylesheet" href="assets/prototype-theme.css">
   <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      max-width: 520px;
-      margin: 0 auto;
-      padding: 1.5rem;
-      background: #f5f5f5;
-      color: #1a1a1a;
-    }
-    h1 { font-size: 1.25rem; margin: 0 0 0.5rem; }
-    .subtitle { color: #555; font-size: 0.875rem; margin-bottom: 1.5rem; }
-    .subtitle a { color: #2563eb; text-decoration: none; }
-    .subtitle a:hover { text-decoration: underline; }
-    section {
-      background: #fff;
-      border-radius: 8px;
-      padding: 1.25rem;
-      margin-bottom: 1rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    }
+    section.screen { background: var(--color-surface); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1rem; box-shadow: var(--shadow-card); border: 1px solid var(--color-border); }
+    .hero { margin-bottom: 1rem; }
+    .hero h2 { font-size: 1.0625rem; margin: 0 0 0.5rem; color: var(--color-text); }
     .entry-buttons { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-    .entry-buttons button {
-      flex: 1;
-      min-width: 140px;
+    .entry-buttons .entry-opt { flex: 1; min-width: 140px; }
+    .entry-buttons .entry-opt button {
+      width: 100%;
       padding: 1rem 1.25rem;
       font-size: 1rem;
-      border: 2px solid #2563eb;
+      border: 2px solid var(--color-primary);
       background: #fff;
-      color: #2563eb;
-      border-radius: 8px;
+      color: var(--color-primary);
+      border-radius: var(--radius-md);
       cursor: pointer;
+      font-weight: 600;
     }
-    .entry-buttons button:hover { background: #eff6ff; }
+    .entry-buttons .entry-opt button:hover { background: var(--color-accent-bg); }
+    .entry-hint { font-size: 0.8125rem; color: var(--color-muted); margin: 0.5rem 0 0; line-height: 1.4; }
     ul.option-list { list-style: none; padding: 0; margin: 0; }
     ul.option-list li { margin-bottom: 0.5rem; }
     ul.option-list button {
       width: 100%;
       padding: 0.75rem 1rem;
       text-align: left;
-      border: 1px solid #e5e7eb;
+      border: 1px solid var(--color-border);
       background: #fff;
-      border-radius: 6px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
       font-size: 0.9375rem;
     }
-    ul.option-list button:hover { background: #f9fafb; border-color: #2563eb; }
-    .description { font-size: 0.875rem; color: #374151; margin: 1rem 0; line-height: 1.5; }
-    .treatments { font-size: 0.8125rem; color: #6b7280; margin: 0.75rem 0; }
-    .treatments strong { color: #374151; }
-    .question-label { font-weight: 500; margin-bottom: 0.5rem; display: block; }
+    ul.option-list button:hover { background: #f8fafc; border-color: var(--color-primary); }
+    ul.option-list button.selected { background: var(--color-accent-bg); border: 2px solid var(--color-primary); }
+    .question-preview {
+      font-size: 0.8125rem;
+      color: #334155;
+      margin: 1rem 0;
+      padding: 0.75rem;
+      background: #f8fafc;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+    }
+    .question-preview h4 { font-size: 0.8125rem; margin: 0 0 0.5rem; font-weight: 600; }
+    .question-preview ol { margin: 0; padding-left: 1.25rem; }
+    .question-preview .q-type { color: var(--color-muted); font-size: 0.75rem; }
+    details.symptom-bank-details { margin-bottom: 0.75rem; font-size: 0.8125rem; }
+    details.symptom-bank-details summary { cursor: pointer; color: #334155; font-weight: 600; }
+    #symptom-upcoming-list { margin: 0.5rem 0 0; padding-left: 1.25rem; font-size: 0.8125rem; color: #475569; }
+    .description { font-size: 0.875rem; color: #334155; margin: 1rem 0; line-height: 1.5; }
+    .treatments { font-size: 0.8125rem; color: var(--color-muted); margin: 0.75rem 0; }
+    .question-label { font-weight: 600; margin-bottom: 0.5rem; display: block; }
     input[type="text"], input[type="number"], select {
       width: 100%;
       padding: 0.5rem 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
       font-size: 1rem;
     }
     .yes-no { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
     .yes-no button {
       flex: 1;
       padding: 0.5rem;
-      border: 1px solid #d1d5db;
+      border: 1px solid var(--color-border);
       background: #fff;
-      border-radius: 6px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
     }
-    .yes-no button.selected { background: #2563eb; color: #fff; border-color: #2563eb; }
-    .nav { display: flex; gap: 0.5rem; margin-top: 1rem; }
+    .yes-no button.selected { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+    .nav { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
     .nav button {
       padding: 0.5rem 1rem;
-      border-radius: 6px;
+      border-radius: var(--radius-sm);
       border: none;
       font-size: 0.9375rem;
       cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
     }
-    .nav .primary { background: #2563eb; color: #fff; }
-    .nav .secondary { background: #e5e7eb; color: #374151; }
-    .summary pre { font-size: 0.8125rem; background: #f9fafb; padding: 1rem; border-radius: 6px; overflow: auto; white-space: pre-wrap; }
-    .summary-note { font-size: 0.8125rem; color: #6b7280; margin-top: 0.75rem; }
-    .summary-friendly { background: #f9fafb; border-radius: 8px; padding: 1rem; margin-top: 0.75rem; font-size: 0.9375rem; }
+    .nav .primary { background: var(--color-primary); color: #fff; }
+    .nav .secondary { background: #e2e8f0; color: #334155; }
+    .summary-note { font-size: 0.8125rem; color: var(--color-muted); margin-top: 0.75rem; }
+    .summary-friendly { background: #f8fafc; border-radius: var(--radius-md); padding: 1rem; margin-top: 0.75rem; font-size: 0.9375rem; border: 1px solid var(--color-border); }
     .summary-friendly .row { margin-bottom: 0.75rem; }
-    .summary-friendly .label { color: #6b7280; font-size: 0.8125rem; margin-bottom: 0.15rem; }
+    .summary-friendly .label { color: var(--color-muted); font-size: 0.8125rem; margin-bottom: 0.15rem; }
     .summary-friendly .value { font-weight: 500; }
-    .summary-friendly h3 { font-size: 0.9375rem; margin: 1rem 0 0.5rem; color: #374151; }
+    .summary-friendly h3 { font-size: 0.9375rem; margin: 1rem 0 0.5rem; color: #334155; }
     .summary-friendly h3:first-child { margin-top: 0; }
-    .hidden { display: none; }
     .photo-required { font-size: 0.8125rem; color: #b45309; margin-top: 0.25rem; }
-    /* Symptom AI Chat */
     .chat-container { display: flex; flex-direction: column; height: 420px; }
     .chat-messages {
       flex: 1;
@@ -104,62 +104,90 @@
     }
     .chat-msg { max-width: 85%; padding: 0.6rem 0.9rem; border-radius: 12px; font-size: 0.9375rem; line-height: 1.4; }
     .chat-msg.ai { align-self: flex-start; background: #e0e7ff; color: #1e3a8a; }
-    .chat-msg.user { align-self: flex-end; background: #2563eb; color: #fff; }
-    .chat-msg .role { font-size: 0.7rem; text-transform: uppercase; opacity: 0.8; margin-bottom: 0.25rem; }
+    .chat-msg.user { align-self: flex-end; background: var(--color-primary); color: #fff; }
+    .chat-msg .role { font-size: 0.7rem; text-transform: uppercase; opacity: 0.85; margin-bottom: 0.25rem; }
     .chat-input-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
     .chat-input-row input { flex: 1; }
-    .chat-input-row button { padding: 0.5rem 1rem; border-radius: 6px; border: none; background: #2563eb; color: #fff; cursor: pointer; }
-    /* Condition billing */
-    .billing-fee { font-size: 1.25rem; font-weight: 600; color: #1e3a8a; margin: 0.5rem 0 1rem; }
+    .chat-input-row button { padding: 0.5rem 1rem; border-radius: var(--radius-sm); border: none; background: var(--color-primary); color: #fff; cursor: pointer; font-weight: 600; }
+    .billing-fee { font-size: 1.25rem; font-weight: 700; color: #1e3a8a; margin: 0.5rem 0 1rem; }
     .billing-form .field { margin-bottom: 1rem; }
-    .billing-form label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.25rem; color: #374151; }
-    .billing-form input[type="email"] { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem; }
-    .billing-form .demo-note { font-size: 0.8125rem; color: #6b7280; margin-top: 0.25rem; }
+    .billing-form label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.25rem; color: #334155; }
+    .billing-form .demo-note { font-size: 0.8125rem; color: var(--color-muted); margin-top: 0.25rem; }
     .billing-actions { margin-top: 1.25rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .summary-actions { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem; align-items: flex-start; }
   </style>
 </head>
-<body>
-  <h1>TeleUrgentCare — AI Assistant</h1>
-  <p class="subtitle">Condition-based or symptom-based intake (project scope demo). <a href="readme.html">Project scope & flow</a></p>
+<body class="prototype-body page-patient shell-patient">
+  <div class="prototype-banner">
+    <div>Prototype for feedback — not for medical use or emergency care.</div>
+    <div class="prototype-banner__hub"><a href="prototype-hub.html">All prototype pages</a></div>
+  </div>
+
+  <p class="shell-label">Patient view (prototype)</p>
+
+  <header class="app-header">
+    <h1>Start a visit</h1>
+    <p class="tagline">Online urgent care without a live video visit. Questions first; a clinician reviews your request.</p>
+  </header>
+
+  <nav class="nav-strip" aria-label="Patient">
+    <a href="index.html">Home</a>
+    <a href="patient-dashboard.html">My visits</a>
+    <a href="readme.html">What to expect</a>
+  </nav>
+
+  <div id="step-tracker" class="step-tracker hidden" aria-label="Progress"></div>
 
   <!-- Entry: Condition vs Symptoms -->
   <section id="entry" class="screen">
-    <p><strong>How would you like to start?</strong></p>
-    <div class="entry-buttons">
-      <button type="button" data-mode="condition">Condition</button>
-      <button type="button" data-mode="symptom">Symptoms</button>
+    <div class="hero">
+      <h2>How would you like to begin?</h2>
     </div>
-    <p class="description">Choose a condition you think you have, or describe your symptoms.</p>
+    <div class="entry-buttons">
+      <div class="entry-opt">
+        <button type="button" data-mode="condition">I know my condition</button>
+        <p class="entry-hint">Example: UTI, pink eye — you’ll see a short explanation, then questions.</p>
+      </div>
+      <div class="entry-opt">
+        <button type="button" data-mode="symptom">I have symptoms</button>
+        <p class="entry-hint">Pick what applies (you can pick more than one). Then a short chat-style Q&amp;A.</p>
+      </div>
+    </div>
   </section>
 
   <!-- Condition list -->
   <section id="condition-list" class="screen hidden">
-    <p><strong>Select a condition</strong></p>
+    <p><strong>Which condition fits best?</strong></p>
     <ul class="option-list" id="condition-options"></ul>
     <button type="button" class="nav secondary" id="back-from-conditions">Back</button>
   </section>
 
-  <!-- Condition detail (description + treatments) -->
+  <!-- Condition detail -->
   <section id="condition-detail" class="screen hidden">
     <p><strong id="condition-detail-name"></strong></p>
     <p class="description" id="condition-detail-desc"></p>
-    <p class="treatments"><strong>Possible treatments (physician will decide):</strong><br><span id="condition-detail-treatments"></span></p>
+    <p class="treatments"><strong>Common treatments (your clinician will decide what’s right for you):</strong><br><span id="condition-detail-treatments"></span></p>
     <p class="photo-required" id="condition-photo-note"></p>
+    <div id="condition-questions-preview" class="question-preview hidden" aria-live="polite"></div>
     <button type="button" class="nav primary" id="start-condition-questions">Continue to questions</button>
     <button type="button" class="nav secondary" id="back-from-condition-detail">Back</button>
   </section>
 
   <!-- Symptom list -->
   <section id="symptom-list" class="screen hidden">
-    <p><strong>Select one or more symptoms</strong></p>
+    <p><strong>Select any symptoms that apply</strong></p>
     <ul class="option-list" id="symptom-options"></ul>
-    <button type="button" class="nav primary" id="start-symptom-chat" disabled>Start AI Chat</button>
+    <button type="button" class="nav primary" id="start-symptom-chat" disabled>Continue</button>
     <button type="button" class="nav secondary" id="back-from-symptoms">Back</button>
   </section>
 
   <!-- Symptom: AI Chat -->
   <section id="symptom-chat" class="screen hidden">
-    <p><strong>Symptom-based intake — AI Chat</strong></p>
+    <p><strong>Questions about your symptoms</strong></p>
+    <details class="symptom-bank-details" id="symptom-bank-details" open>
+      <summary>Questions we’ll ask (in order)</summary>
+      <ol id="symptom-upcoming-list"></ol>
+    </details>
     <div class="chat-container">
       <div class="chat-messages" id="chat-messages"></div>
       <div class="chat-input-row">
@@ -173,7 +201,7 @@
 
   <!-- Questions (condition only) -->
   <section id="questions" class="screen hidden">
-    <p><strong>AI Assistant questions</strong> <span id="question-progress"></span></p>
+    <p><strong>Questions</strong> <span id="question-progress"></span></p>
     <p class="question-label" id="question-text"></p>
     <div id="question-input"></div>
     <div class="nav">
@@ -182,14 +210,14 @@
     </div>
   </section>
 
-  <!-- Condition: Billing & Payment (condition-based only) -->
+  <!-- Condition: Billing -->
   <section id="condition-billing" class="screen hidden">
-    <p><strong>Billing & payment</strong></p>
-    <p class="description">Consultation fee for this condition-based visit.</p>
+    <p><strong>Visit fee</strong></p>
+    <p class="description">Condition-based visit fee (prototype — no real charge).</p>
     <p class="billing-fee" id="billing-fee-amount">$49.99</p>
     <form id="billing-form" class="billing-form" novalidate>
       <div class="field">
-        <label for="billing-name">Billing name</label>
+        <label for="billing-name">Name on billing</label>
         <input type="text" id="billing-name" placeholder="Full name" required />
       </div>
       <div class="field">
@@ -200,27 +228,30 @@
         <label for="billing-address">Billing address</label>
         <input type="text" id="billing-address" placeholder="Street, city, state, ZIP" />
       </div>
-      <p class="demo-note">Payment method (demo only — no real charge).</p>
+      <p class="demo-note">Payment step is for layout only in this prototype.</p>
     </form>
     <div class="billing-actions">
-      <button type="button" class="nav primary" id="proceed-to-payment">Proceed to Payment — $49.99</button>
+      <button type="button" class="nav primary" id="proceed-to-payment">Continue — $49.99</button>
       <button type="button" class="nav secondary" id="back-from-billing">Back</button>
     </div>
   </section>
 
   <!-- Summary -->
   <section id="summary" class="screen hidden">
-    <p><strong>Intake summary</strong></p>
-    <p class="summary-note">This summary would be sent to the physician. The AI does not diagnose or recommend treatment to you.</p>
+    <p><strong>You’re all set</strong></p>
+    <p class="summary-note">Your answers are summarized for the clinician. The assistant does not give you a diagnosis or treatment plan — your clinician does.</p>
     <div id="summary-body" class="summary-friendly"></div>
-    <button type="button" class="nav secondary" id="start-over" style="margin-top:1rem">Start over</button>
+    <div class="summary-actions">
+      <a class="btn btn-primary" href="patient-dashboard.html">View my visit status</a>
+      <button type="button" class="nav secondary" id="start-over">Start over</button>
+    </div>
   </section>
 
   <script>
     (function () {
       let conditionsData = { conditions: [] };
       let symptomsData = { symptoms: [] };
-      let mode = null; // 'condition' | 'symptom'
+      let mode = null;
       let selectedCondition = null;
       let selectedSymptoms = [];
       let currentQuestions = [];
@@ -229,12 +260,50 @@
       let billingDetails = {};
 
       const $ = (id) => document.getElementById(id);
-      const show = (id) => document.querySelectorAll('.screen').forEach(el => { el.classList.add('hidden'); });
       const showScreen = (id) => {
         document.querySelectorAll('.screen').forEach(el => el.classList.add('hidden'));
         const el = document.getElementById(id);
         if (el) el.classList.remove('hidden');
+        updateStepTracker(id);
       };
+
+      function updateStepTracker(screenId) {
+        const el = $('step-tracker');
+        if (!el) return;
+        if (screenId === 'entry') {
+          el.classList.add('hidden');
+          el.innerHTML = '';
+          return;
+        }
+        el.classList.remove('hidden');
+        const mk = (labels, activeIndex) => {
+          let html = '';
+          labels.forEach((label, i) => {
+            let cls = 'step';
+            if (i < activeIndex) cls += ' done';
+            else if (i === activeIndex) cls += ' active';
+            html += '<span class="' + cls + '">' + escapeHtml(label) + '</span>';
+            if (i < labels.length - 1) html += '<span class="sep" aria-hidden="true">→</span>';
+          });
+          el.innerHTML = html;
+        };
+        if (mode === 'condition') {
+          let idx = 0;
+          if (['condition-list', 'condition-detail'].includes(screenId)) idx = 0;
+          else if (screenId === 'questions') idx = 1;
+          else if (screenId === 'condition-billing') idx = 2;
+          else if (screenId === 'summary') idx = 3;
+          mk(['Choose', 'Questions', 'Fee & details', 'Submitted'], idx);
+        } else if (mode === 'symptom') {
+          let idx = 0;
+          if (screenId === 'symptom-list') idx = 0;
+          else if (screenId === 'symptom-chat') idx = 1;
+          else if (screenId === 'summary') idx = 2;
+          mk(['Choose symptoms', 'Questions', 'Submitted'], idx);
+        } else {
+          el.classList.add('hidden');
+        }
+      }
 
       function loadData() {
         return Promise.all([
@@ -246,7 +315,6 @@
         });
       }
 
-      // --- Entry ---
       document.querySelectorAll('#entry [data-mode]').forEach(btn => {
         btn.addEventListener('click', () => {
           mode = btn.getAttribute('data-mode');
@@ -255,7 +323,8 @@
             showScreen('condition-list');
           } else {
             selectedSymptoms = [];
-            startSymptomChat();
+            renderSymptomList();
+            showScreen('symptom-list');
           }
         });
       });
@@ -273,9 +342,10 @@
             $('condition-detail-desc').textContent = selectedCondition.description;
             $('condition-detail-treatments').textContent = selectedCondition.possibleTreatments.join('; ');
             $('condition-photo-note').textContent = selectedCondition.photoRequired
-              ? 'Photo upload will be required before submission (demo: skipped).'
+              ? 'You may be asked for photos before your visit is submitted (skipped in this preview).'
               : '';
             $('condition-photo-note').classList.toggle('hidden', !selectedCondition.photoRequired);
+            renderConditionQuestionPreview();
             showScreen('condition-detail');
           });
         });
@@ -290,14 +360,29 @@
       });
       $('back-from-condition-detail').addEventListener('click', () => showScreen('condition-list'));
 
+      function renderConditionQuestionPreview() {
+        const wrap = $('condition-questions-preview');
+        if (!selectedCondition || !selectedCondition.questions || selectedCondition.questions.length === 0) {
+          wrap.classList.add('hidden');
+          wrap.innerHTML = '';
+          return;
+        }
+        const items = selectedCondition.questions.map((q) =>
+          '<li><span class="q-type">' + escapeHtml((q.type || 'text').replace(/_/g, ' ')) + '</span> — ' + escapeHtml(q.text) + '</li>'
+        ).join('');
+        wrap.innerHTML = '<h4>Questions you’ll see next</h4><ol>' + items + '</ol>';
+        wrap.classList.remove('hidden');
+      }
+
       function renderSymptomList() {
         const ul = $('symptom-options');
         ul.innerHTML = symptomsData.symptoms.map(s =>
-          `<li><button type="button" data-id="${s.id}">${s.name}</button></li>`
+          `<li><button type="button" data-id="${s.id}">${escapeHtml(s.name)}</button></li>`
         ).join('');
         ul.querySelectorAll('button').forEach(btn => {
+          const id = btn.getAttribute('data-id');
+          btn.classList.toggle('selected', selectedSymptoms.includes(id));
           btn.addEventListener('click', () => {
-            const id = btn.getAttribute('data-id');
             const idx = selectedSymptoms.indexOf(id);
             if (idx === -1) selectedSymptoms.push(id);
             else selectedSymptoms.splice(idx, 1);
@@ -305,27 +390,42 @@
             $('start-symptom-chat').disabled = selectedSymptoms.length === 0;
           });
         });
-        selectedSymptoms = [];
-        $('start-symptom-chat').disabled = true;
+        $('start-symptom-chat').disabled = selectedSymptoms.length === 0;
       }
 
       $('back-from-symptoms').addEventListener('click', () => { showScreen('entry'); });
 
-      // --- Symptom AI Chat (knowledge base + question flow) ---
       let chatQuestionIndex = 0;
 
-      const DEMO_SYMPTOM_QUESTIONS = [
-        { id: 'demo_1', text: 'What symptoms are you experiencing today?', type: 'text', summaryKey: 'symptoms_description' },
-        { id: 'demo_2', text: 'How long have you had these symptoms?', type: 'text', summaryKey: 'duration' },
-        { id: 'demo_3', text: 'Photo upload is required for certain symptoms (e.g. rash, skin). In production you would upload 2–3 clear photos here. (Demo: no upload — type anything to continue.)', type: 'text', summaryKey: 'photos_note' },
-        { id: 'demo_4', text: 'Anything else we should know?', type: 'text', summaryKey: 'additional_notes' }
-      ];
+      function mergeSymptomQuestionsFromSelection() {
+        if (selectedSymptoms.length === 0) return [];
+        const symptoms = symptomsData.symptoms.filter(s => selectedSymptoms.includes(s.id));
+        const seen = new Set();
+        const merged = [];
+        symptoms.forEach(s => {
+          (s.questions || []).forEach(q => {
+            if (!seen.has(q.id)) { seen.add(q.id); merged.push(q); }
+          });
+        });
+        return merged;
+      }
+
+      function renderSymptomUpcomingList() {
+        const ol = $('symptom-upcoming-list');
+        if (!currentQuestions.length) {
+          ol.innerHTML = '<li>No extra structured questions for this combination — you can finish to submit.</li>';
+          return;
+        }
+        ol.innerHTML = currentQuestions.map((q, i) =>
+          '<li><span class="q-type">' + escapeHtml(String(i + 1)) + '.</span> ' + escapeHtml(q.text) + '</li>'
+        ).join('');
+      }
 
       function appendChatMessage(role, text) {
         const wrap = $('chat-messages');
         const div = document.createElement('div');
         div.className = 'chat-msg ' + role;
-        div.innerHTML = '<div class="role">' + (role === 'ai' ? 'AI Assistant' : 'You') + '</div>' + escapeHtml(text);
+        div.innerHTML = '<div class="role">' + (role === 'ai' ? 'Assistant' : 'You') + '</div>' + escapeHtml(text);
         wrap.appendChild(div);
         wrap.scrollTop = wrap.scrollHeight;
       }
@@ -336,28 +436,19 @@
       }
 
       function startSymptomChat() {
-        if (selectedSymptoms.length === 0) {
-          currentQuestions = DEMO_SYMPTOM_QUESTIONS.slice();
-        } else {
-          const symptoms = symptomsData.symptoms.filter(s => selectedSymptoms.includes(s.id));
-          const seen = new Set();
-          currentQuestions = [];
-          symptoms.forEach(s => {
-            (s.questions || []).forEach(q => {
-              if (!seen.has(q.id)) { seen.add(q.id); currentQuestions.push(q); }
-            });
-          });
-        }
+        if (selectedSymptoms.length === 0) return;
+        currentQuestions = mergeSymptomQuestionsFromSelection();
         chatQuestionIndex = 0;
         answers = {};
         showScreen('symptom-chat');
+        renderSymptomUpcomingList();
         $('chat-messages').innerHTML = '';
         $('chat-finish').classList.add('hidden');
-        appendChatMessage('ai', 'I\'m your intake assistant. Describe your symptoms and I\'ll ask a few follow-up questions. I don\'t diagnose or recommend treatment—a physician will review your answers.');
+        appendChatMessage('ai', 'I’ll ask a few follow-up questions. I don’t diagnose or prescribe — a clinician will review everything.');
         if (currentQuestions.length > 0) {
           appendChatMessage('ai', currentQuestions[0].text);
         } else {
-          appendChatMessage('ai', 'I have enough information. You can finish and see your summary.');
+          appendChatMessage('ai', 'You can finish and see your summary.');
           $('chat-finish').classList.remove('hidden');
         }
         $('chat-input').value = '';
@@ -376,7 +467,7 @@
         if (key != null) answers[key] = text;
         chatQuestionIndex++;
         if (chatQuestionIndex >= currentQuestions.length) {
-          appendChatMessage('ai', 'I have enough information. You can finish and see your summary below.');
+          appendChatMessage('ai', 'Thanks — you can finish and see your summary below.');
           $('chat-finish').classList.remove('hidden');
           return;
         }
@@ -386,7 +477,10 @@
 
       $('chat-send').addEventListener('click', sendChatMessage);
       $('chat-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); sendChatMessage(); } });
-      $('back-from-chat').addEventListener('click', () => { showScreen('entry'); });
+      $('back-from-chat').addEventListener('click', () => {
+        if (mode === 'symptom') showScreen('symptom-list');
+        else showScreen('entry');
+      });
       $('chat-finish').addEventListener('click', () => { showSummary(); });
 
       function runQuestions() {
@@ -494,6 +588,16 @@
         return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
       }
 
+      function buildIntakeSummaryText(entry, answers) {
+        const parts = [];
+        parts.push('Visit type: ' + (entry.type || '') + '. Reason: ' + (entry.value || '') + '.');
+        const keys = Object.keys(answers || {});
+        if (keys.length) {
+          parts.push('Patient responses include: ' + keys.slice(0, 8).map(k => humanizeKey(k)).join(', ') + (keys.length > 8 ? '…' : '') + '.');
+        }
+        return parts.join(' ');
+      }
+
       function getAIRecommendation(mode, selectedCondition, symptomValue, answers) {
         if (mode === 'condition' && selectedCondition) {
           const name = selectedCondition.name || '';
@@ -506,8 +610,7 @@
           }
           return line;
         }
-        const desc = (answers.symptoms_description || symptomValue || '').toLowerCase();
-        const duration = (answers.duration || '').toString();
+        const desc = (symptomValue + ' ' + (answers.symptoms_description || '')).toLowerCase();
         let text = '';
         if (/\bcough\b/.test(desc)) {
           text = 'Based on reported symptoms (cough) and duration. Possible considerations: viral URI, acute bronchitis. Suggested: supportive care, rest, fluids; physician may consider further workup if indicated.';
@@ -534,11 +637,11 @@
           ? { type: 'Condition', value: selectedCondition ? selectedCondition.name : '' }
           : { type: 'Symptoms', value: symptomValue };
         let html = '';
-        html += '<h3>1. Intake Summary (sent to physician)</h3>';
-        html += '<div class="row"><div class="label">Type</div><div class="value">' + escapeHtml(entry.type) + '</div></div>';
-        html += '<div class="row"><div class="label">Selected</div><div class="value">' + escapeHtml(entry.value) + '</div></div>';
+        html += '<h3>Summary for your clinician</h3>';
+        html += '<div class="row"><div class="label">Visit type</div><div class="value">' + escapeHtml(entry.type) + '</div></div>';
+        html += '<div class="row"><div class="label">Main concern</div><div class="value">' + escapeHtml(entry.value) + '</div></div>';
         if (mode === 'condition' && billingDetails && (billingDetails.name || billingDetails.email)) {
-          html += '<div class="row"><div class="label">Consultation fee</div><div class="value">$49.99</div></div>';
+          html += '<div class="row"><div class="label">Visit fee</div><div class="value">$49.99</div></div>';
           if (billingDetails.name) html += '<div class="row"><div class="label">Billing name</div><div class="value">' + escapeHtml(billingDetails.name) + '</div></div>';
           if (billingDetails.email) html += '<div class="row"><div class="label">Email</div><div class="value">' + escapeHtml(billingDetails.email) + '</div></div>';
           if (billingDetails.address) html += '<div class="row"><div class="label">Billing address</div><div class="value">' + escapeHtml(billingDetails.address) + '</div></div>';
@@ -551,9 +654,22 @@
           }
         }
         const aiRec = getAIRecommendation(mode, selectedCondition, symptomValue, answers);
-        html += '<h3>2. AI-driven Recommendation (sent to physician)</h3>';
+        html += '<h3>Notes for clinician review only</h3>';
         html += '<div class="row"><div class="value summary-ai-rec">' + escapeHtml(aiRec) + '</div></div>';
         $('summary-body').innerHTML = html;
+
+        const intakeSummary = buildIntakeSummaryText(entry, answers);
+        try {
+          localStorage.setItem('teleurgentcare_last_intake', JSON.stringify({
+            savedAt: new Date().toISOString(),
+            mode: mode,
+            entry: entry,
+            answers: answers,
+            aiRecommendation: aiRec,
+            intakeSummary: intakeSummary,
+            billingDetails: mode === 'condition' ? billingDetails : null
+          }));
+        } catch (e) {}
       }
 
       $('start-over').addEventListener('click', () => {
@@ -565,7 +681,7 @@
       });
 
       loadData().catch(() => {
-        $('entry').innerHTML += '<p style="color:#b91c1c;">Could not load data. Serve this folder via a web server (e.g. open from http://localhost).</p>';
+        $('entry').innerHTML += '<p style="color:#b91c1c;">Could not load data. Open this site from a local web address (e.g. http://localhost).</p>';
       });
     })();
   </script>

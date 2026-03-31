@@ -1,0 +1,96 @@
+{
+  "schema_note": "Cases use status_code per project-scope TeleUrgentCare_Physician_Dashboard_Action_Status_Schema; see data/dashboard-statuses.json",
+  "cases": [
+    {
+      "id": "PHY-1042",
+      "status_code": "awaiting_clinician_triage",
+      "patientLabel": "Patient A (demo)",
+      "submittedAt": "2026-03-28T14:22:00.000Z",
+      "entryMode": "condition",
+      "chiefComplaint": "Yeast infection",
+      "intakeSummary": "Patient reports itching and discharge; onset 2 days ago; no prior treatment this episode.",
+      "aiRecommendation": "Based on condition \"Yeast infection\" and intake. Suggested treatment options: Antifungal cream or suppositories; Oral antifungal (if indicated). Physician to confirm.",
+      "answers": {
+        "onset": "2 days ago",
+        "itching": "yes",
+        "discharge": "yes",
+        "recurrence": "yes",
+        "pregnancy_status": "no"
+      },
+      "redFlags": { "reviewed": true, "triggered": false, "notes": "No emergency criteria flagged in prototype." },
+      "disposition": "routine_async"
+    },
+    {
+      "id": "PHY-1041",
+      "status_code": "under_review",
+      "sla_priority": "urgent",
+      "patientLabel": "Patient B (demo)",
+      "submittedAt": "2026-03-28T13:05:00.000Z",
+      "entryMode": "symptom",
+      "chiefComplaint": "Headache, nausea",
+      "intakeSummary": "Sudden onset headache, severity 8/10; nausea present; no neck stiffness reported.",
+      "aiRecommendation": "Based on reported symptoms (headache) and duration. Possible considerations: tension headache, migraine, viral illness. Suggested: physician to confirm diagnosis and treatment based on severity and red flags.",
+      "answers": {
+        "onset": "Today",
+        "sudden_or_gradual": "Sudden",
+        "severity": "8",
+        "nausea_vomiting": "yes",
+        "fever_neck_stiffness": "no"
+      },
+      "redFlags": { "reviewed": true, "triggered": false, "notes": "Monitor for neuro red flags; prototype only." },
+      "disposition": "urgent_same_day"
+    },
+    {
+      "id": "PHY-1038",
+      "status_code": "awaiting_clarification",
+      "patientLabel": "Patient C (demo)",
+      "submittedAt": "2026-03-27T11:30:00.000Z",
+      "entryMode": "condition",
+      "chiefComplaint": "Acne",
+      "intakeSummary": "Photos noted as required; patient indicated demo placeholder for upload.",
+      "aiRecommendation": "Physician to assess skin findings when photos available.",
+      "answers": { "duration": "3 weeks", "location": "Face", "prior_treatment": "OTC wash", "photos_note": "demo" },
+      "redFlags": { "reviewed": true, "triggered": false, "notes": "" },
+      "disposition": "awaiting_info"
+    },
+    {
+      "id": "PHY-1035",
+      "status_code": "pending_prescription_review",
+      "patientLabel": "Patient D (demo)",
+      "submittedAt": "2026-03-26T16:00:00.000Z",
+      "entryMode": "symptom",
+      "chiefComplaint": "Sore throat",
+      "intakeSummary": "Sore throat 4 days; fever yes; pain 6/10.",
+      "aiRecommendation": "Possible viral pharyngitis vs strep — physician to determine testing.",
+      "answers": { "onset": "4 days ago", "severity": "6", "fever_cough": "yes", "swallowing": "yes" },
+      "redFlags": { "reviewed": true, "triggered": false, "notes": "" },
+      "disposition": "routine_async"
+    },
+    {
+      "id": "PHY-1020",
+      "status_code": "completed",
+      "patientLabel": "Patient E (demo)",
+      "submittedAt": "2026-03-20T09:00:00.000Z",
+      "entryMode": "condition",
+      "chiefComplaint": "Sinus infection",
+      "intakeSummary": "Completed visit; patient messaged.",
+      "aiRecommendation": "Supportive care; antibiotics if bacterial — per physician.",
+      "answers": {},
+      "redFlags": { "reviewed": true, "triggered": false, "notes": "" },
+      "disposition": "completed"
+    },
+    {
+      "id": "PHY-1011",
+      "status_code": "escalate_urgent_in_person",
+      "patientLabel": "Patient F (demo)",
+      "submittedAt": "2026-03-15T08:00:00.000Z",
+      "entryMode": "symptom",
+      "chiefComplaint": "Rash with systemic symptoms (training case)",
+      "intakeSummary": "Escalated for in-person evaluation per protocol (demo).",
+      "aiRecommendation": "Physician to review photos and systemic symptoms.",
+      "answers": {},
+      "redFlags": { "reviewed": true, "triggered": true, "notes": "Training row — escalation path only." },
+      "disposition": "in_person_advised"
+    }
+  ]
+}

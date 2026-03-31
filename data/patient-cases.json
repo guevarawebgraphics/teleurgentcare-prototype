@@ -1,0 +1,34 @@
+{
+  "cases": [
+    {
+      "id": "case-demo-001",
+      "submittedAt": "2026-03-28T10:15:00.000Z",
+      "type": "condition",
+      "chiefComplaint": "Urinary tract infection (UTI)",
+      "status": "in_review",
+      "typicalResponseNote": "Typical response within 2 hours for asynchronous review.",
+      "physicianNote": null,
+      "prescriptionSummary": null
+    },
+    {
+      "id": "case-demo-002",
+      "submittedAt": "2026-03-27T18:40:00.000Z",
+      "type": "symptom",
+      "chiefComplaint": "Cough, sore throat",
+      "status": "completed",
+      "typicalResponseNote": "",
+      "physicianNote": "Likely viral upper respiratory infection. Rest, fluids, and OTC supportive care as discussed.",
+      "prescriptionSummary": null
+    },
+    {
+      "id": "case-demo-003",
+      "submittedAt": "2026-03-26T09:00:00.000Z",
+      "type": "condition",
+      "chiefComplaint": "Pink eye (conjunctivitis)",
+      "status": "completed",
+      "typicalResponseNote": "",
+      "physicianNote": "Assessment consistent with conjunctivitis. Prescription sent to your pharmacy.",
+      "prescriptionSummary": "Antibiotic eye drops — use as directed on label."
+    }
+  ]
+}

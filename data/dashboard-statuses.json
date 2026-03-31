@@ -1,0 +1,22 @@
+{
+  "statuses": [
+    { "status_code": "new_intake", "status_label": "New Intake", "stage_group": "intake", "terminal_status": false, "sla_priority": "urgent" },
+    { "status_code": "ai_processing", "status_label": "AI Processing", "stage_group": "intake", "terminal_status": false, "sla_priority": "high" },
+    { "status_code": "awaiting_clinician_triage", "status_label": "Awaiting Clinician Triage", "stage_group": "review", "terminal_status": false, "sla_priority": "urgent" },
+    { "status_code": "under_review", "status_label": "Under Review", "stage_group": "review", "terminal_status": false, "sla_priority": "urgent" },
+    { "status_code": "awaiting_clarification", "status_label": "Awaiting Clarification", "stage_group": "clarification", "terminal_status": false, "sla_priority": "high" },
+    { "status_code": "clarification_received", "status_label": "Clarification Received", "stage_group": "clarification", "terminal_status": false, "sla_priority": "urgent" },
+    { "status_code": "pending_prescription_review", "status_label": "Pending Prescription Review", "stage_group": "prescription", "terminal_status": false, "sla_priority": "high" },
+    { "status_code": "testing_required_before_rx", "status_label": "Testing Required Before Rx", "stage_group": "prescription", "terminal_status": false, "sla_priority": "high" },
+    { "status_code": "prescription_sent", "status_label": "Prescription Sent", "stage_group": "completion", "terminal_status": false, "sla_priority": "routine" },
+    { "status_code": "declined_prescription", "status_label": "Prescription Declined", "stage_group": "completion", "terminal_status": false, "sla_priority": "routine" },
+    { "status_code": "ready_to_finalize", "status_label": "Ready to Finalize", "stage_group": "completion", "terminal_status": false, "sla_priority": "routine" },
+    { "status_code": "completed", "status_label": "Completed", "stage_group": "completion", "terminal_status": true, "sla_priority": "routine" },
+    { "status_code": "escalate_urgent_in_person", "status_label": "Escalate to Urgent In-Person Care", "stage_group": "escalation", "terminal_status": true, "sla_priority": "urgent" },
+    { "status_code": "escalate_er", "status_label": "Escalate to Emergency Care", "stage_group": "escalation", "terminal_status": true, "sla_priority": "urgent" },
+    { "status_code": "redflag_stopped", "status_label": "Stopped by Red-Flag Engine", "stage_group": "safety", "terminal_status": true, "sla_priority": "urgent" },
+    { "status_code": "not_appropriate_async", "status_label": "Not Appropriate for Asynchronous Care", "stage_group": "safety", "terminal_status": true, "sla_priority": "high" },
+    { "status_code": "declined_service", "status_label": "Declined Service", "stage_group": "closure", "terminal_status": true, "sla_priority": "routine" },
+    { "status_code": "no_response_closed", "status_label": "Closed - No Patient Response", "stage_group": "closure", "terminal_status": true, "sla_priority": "routine" }
+  ]
+}

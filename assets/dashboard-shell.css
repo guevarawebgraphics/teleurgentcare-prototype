@@ -1,0 +1,68 @@
+/* AdminLTE-like shell for dashboard-app — use with Bootstrap 5 */
+
+body.dashboard-app.prototype-body {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f4f6f9;
+}
+
+.dashboard-app .prototype-banner {
+  flex-shrink: 0;
+}
+
+.dashboard-navbar {
+  flex-shrink: 0;
+}
+
+.dashboard-content {
+  flex: 1;
+  min-height: 0;
+}
+
+.dashboard-sidebar {
+  min-height: calc(100vh - 120px);
+}
+
+.dashboard-main {
+  background: #f4f6f9;
+}
+
+/* Featured intake card (patient) */
+body.dashboard-app .card-featured {
+  border: 2px solid #0d6efd !important;
+  box-shadow: 0 0.125rem 0.5rem rgba(13, 110, 253, 0.15);
+}
+
+/* Case list scroll (physician) — legacy if list pattern returns */
+.case-list-scroll {
+  max-height: min(320px, 50vh);
+  overflow-y: auto;
+}
+
+/* Physician inbox: clickable request cards */
+body.dashboard-app--clinician .inbox-card-btn {
+  background: #fff;
+}
+
+/* Physician detail: legacy .detail inside Bootstrap card */
+.dashboard-app .detail h2 {
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+  color: #1e3a8a;
+}
+
+.dashboard-app .detail h3 {
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: #495057;
+}
+
+/* Queue / case buttons inherit Bootstrap list-group; keep badge readable */
+.dashboard-app .badge-demo {
+  font-size: 0.65rem;
+}

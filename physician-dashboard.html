@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clinician inbox — TeleUrgentCare</title>
+  <link rel="stylesheet" href="assets/prototype-theme.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="assets/dashboard-shell.css">
+  <style>
+    body.dashboard-app .detail .detail-row { font-size: 0.875rem; margin-bottom: 0.5rem; line-height: 1.45; }
+    body.dashboard-app .detail .label { color: var(--color-muted); font-size: 0.75rem; display: block; margin-bottom: 0.15rem; }
+    body.dashboard-app pre.answers {
+      font-size: 0.75rem;
+      background: #f8f9fa;
+      padding: 0.75rem;
+      border-radius: var(--radius-sm, 0.25rem);
+      overflow: auto;
+      white-space: pre-wrap;
+      margin: 0;
+      border: 1px solid var(--color-border, #dee2e6);
+    }
+    body.dashboard-app .err { color: #b91c1c; font-size: 0.875rem; }
+    body.dashboard-app .inbox-card-btn {
+      text-align: left;
+      cursor: pointer;
+      transition: box-shadow 0.15s ease, transform 0.15s ease;
+    }
+    body.dashboard-app .inbox-card-btn:hover {
+      box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1) !important;
+    }
+    body.dashboard-app .inbox-card-btn:focus-visible {
+      outline: 2px solid #0d6efd;
+      outline-offset: 2px;
+    }
+    .status-badge-label { max-width: 100%; white-space: normal; line-height: 1.2; font-weight: 600; }
+  </style>
+</head>
+<body class="dashboard-app dashboard-app--clinician prototype-body shell-clinician">
+  <div class="prototype-banner">
+    <div>Prototype for feedback — not for medical use or emergency care.</div>
+    <div class="prototype-banner__hub"><span class="text-white-50">Demo build</span></div>
+  </div>
+
+  <nav class="navbar navbar-dark bg-dark dashboard-navbar">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-semibold mb-0" href="physician-dashboard.html">TeleUrgentCare · Clinician</a>
+      <span class="navbar-text text-white-50 small ms-auto">Inbox</span>
+    </div>
+  </nav>
+
+  <div class="container-fluid dashboard-content px-0 flex-grow-1">
+    <main class="dashboard-main py-3 px-3 px-lg-4">
+      <h1 class="h3 mb-1">Inbox</h1>
+      <p class="text-muted mb-4">All patient requests on one screen. Workflow uses <code class="small">status_code</code> per project-scope Physician Dashboard schema.</p>
+
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white fw-semibold d-flex align-items-center justify-content-between">
+          <span>Requests</span>
+          <span class="badge bg-light text-secondary fw-normal" id="request-count-badge" aria-live="polite">—</span>
+        </div>
+        <div class="card-body">
+          <div id="session-hint"></div>
+          <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3" id="case-cards-root"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal fade" id="requestDetailModal" tabindex="-1" aria-labelledby="requestDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title fs-5" id="requestDetailModalLabel">Request</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="case-detail"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script>
+    (function () {
+      var CASE_STATE_KEY = 'teleurgentcare_demo_case_state';
+      var AUDIT_LOG_KEY = 'teleurgentcare_demo_audit_log';
+      var state = { data: null, selectedId: null, statuses: [], actions: [] };
+      var serverSyncTimer = null;
+      var requestModalEl = document.getElementById('requestDetailModal');
+      var requestModal = requestModalEl ? window.bootstrap.Modal.getOrCreateInstance(requestModalEl) : null;
+
+      var LEGACY_QUEUE_TO_STATUS = {
+        'New': 'awaiting_clinician_triage',
+        'Urgent': 'under_review',
+        'Awaiting clarification': 'awaiting_clarification',
+        'Ready for prescribing': 'pending_prescription_review',
+        'Completed': 'completed',
+        'Escalated': 'escalate_urgent_in_person'
+      };
+
+      function escapeHtml(s) {
+        var p = document.createElement('p');
+        p.textContent = s;
+        return p.innerHTML;
+      }
+
+      function formatDate(iso) {
+        try {
+          return new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+        } catch (e) {
+          return iso;
+        }
+      }
+
+      function migrateLegacyQueueField(q) {
+        if (!q) return null;
+        if (LEGACY_QUEUE_TO_STATUS[q]) return LEGACY_QUEUE_TO_STATUS[q];
+        return q;
+      }
+
+      function normalizeCaseFromJson(c) {
+        if (!c.status_code && c.queue) {
+          c.status_code = migrateLegacyQueueField(c.queue) || 'under_review';
+        }
+        delete c.queue;
+        return c;
+      }
+
+      function findStatusRow(statusCode) {
+        return state.statuses.find(function (s) { return s.status_code === statusCode; }) || null;
+      }
+
+      function statusBadgeClass(row) {
+        if (!row) return 'bg-secondary';
+        if (row.terminal_status) {
+          if (row.stage_group === 'escalation') return 'bg-dark';
+          if (row.stage_group === 'safety') return 'bg-danger';
+          if (row.stage_group === 'closure') return 'bg-secondary';
+          return 'bg-success';
+        }
+        var g = row.stage_group;
+        if (g === 'intake') return 'bg-primary';
+        if (g === 'review') return row.sla_priority === 'urgent' ? 'bg-danger' : 'bg-primary';
+        if (g === 'clarification') return 'bg-warning text-dark';
+        if (g === 'prescription') return 'bg-info text-dark';
+        if (g === 'completion') return 'bg-success';
+        return 'bg-secondary';
+      }
+
+      function getEffectiveStatusCode(c) {
+        var st = getCaseState(c.id);
+        if (st.status_code) return st.status_code;
+        return c.status_code || 'under_review';
+      }
+
+      function getStatusLabel(code) {
+        var row = findStatusRow(code);
+        return row ? row.status_label : code;
+      }
+
+      function allCasesSorted() {
+        var cases = (state.data && state.data.cases) ? state.data.cases.slice() : [];
+        cases.sort(function (a, b) {
+          var ta = new Date(a.submittedAt || 0).getTime();
+          var tb = new Date(b.submittedAt || 0).getTime();
+          return tb - ta;
+        });
+        return cases;
+      }
+
+      function buildSessionCase() {
+        var raw = null;
+        try {
+          raw = localStorage.getItem('teleurgentcare_last_intake');
+        } catch (e) {}
+        if (!raw) return null;
+        var intake;
+        try {
+          intake = JSON.parse(raw);
+        } catch (e) {
+          return null;
+        }
+        var entry = intake.entry || {};
+        var chief = entry.value || 'Patient intake';
+        var summary = intake.intakeSummary || ('Visit type: ' + (entry.type || '') + '. Concern: ' + chief + '.');
+        return {
+          id: 'SESSION-DEMO',
+          status_code: 'awaiting_clinician_triage',
+          patientLabel: 'Demo patient (this browser)',
+          submittedAt: intake.savedAt || new Date().toISOString(),
+          entryMode: intake.mode === 'condition' ? 'condition' : 'symptom',
+          chiefComplaint: chief,
+          intakeSummary: summary,
+          aiRecommendation: intake.aiRecommendation || '',
+          answers: intake.answers || {},
+          redFlags: { reviewed: true, triggered: false, notes: 'From intake completed on this device (preview).' },
+          disposition: 'routine_async',
+          _sessionDemo: true
+        };
+      }
+
+      function mergeSessionIntoData(data) {
+        var sessionCase = buildSessionCase();
+        var cases = (data.cases || []).filter(function (c) { return c.id !== 'SESSION-DEMO'; });
+        if (sessionCase) {
+          cases = [sessionCase].concat(cases);
+        }
+        data.cases = cases.map(normalizeCaseFromJson);
+        return data;
+      }
+
+      function migrateStoredCaseStateEntry(entry) {
+        if (!entry || typeof entry !== 'object') return;
+        if (entry.queue != null && entry.status_code == null) {
+          entry.status_code = migrateLegacyQueueField(entry.queue) || entry.queue;
+          delete entry.queue;
+        }
+      }
+
+      function getCaseStateMap() {
+        var map = {};
+        try {
+          var raw = localStorage.getItem(CASE_STATE_KEY);
+          if (raw) map = JSON.parse(raw);
+          if (typeof map !== 'object' || map === null) map = {};
+        } catch (e) {
+          map = {};
+        }
+        try {
+          var legacy = localStorage.getItem('teleurgentcare_demo_queue_overrides');
+          if (legacy) {
+            var o = JSON.parse(legacy);
+            if (typeof o === 'object' && o !== null) {
+              for (var id in o) {
+                if (!map[id]) map[id] = {};
+                if (o[id]) map[id].queue = o[id];
+              }
+            }
+            localStorage.removeItem('teleurgentcare_demo_queue_overrides');
+            localStorage.setItem(CASE_STATE_KEY, JSON.stringify(map));
+          }
+        } catch (e2) {}
+        for (var cid in map) {
+          migrateStoredCaseStateEntry(map[cid]);
+        }
+        try {
+          localStorage.setItem(CASE_STATE_KEY, JSON.stringify(map));
+        } catch (e3) {}
+        return map;
+      }
+
+      function getCaseState(caseId) {
+        var map = getCaseStateMap();
+        return map[caseId] || {};
+      }
+
+      function mergeServerCaseState(serverMap) {
+        if (!serverMap || typeof serverMap !== 'object') return;
+        var local = getCaseStateMap();
+        var merged = {};
+        var ids = {};
+        function mark(id) {
+          if (id) ids[id] = true;
+        }
+        Object.keys(local).forEach(mark);
+        Object.keys(serverMap).forEach(mark);
+        Object.keys(ids).forEach(function (id) {
+          var L = local[id] || {};
+          var S = serverMap[id] || {};
+          var tL = L.updatedAt ? new Date(L.updatedAt).getTime() : 0;
+          var tS = S.updatedAt ? new Date(S.updatedAt).getTime() : 0;
+          merged[id] = tS > tL ? S : L;
+          migrateStoredCaseStateEntry(merged[id]);
+        });
+        try {
+          localStorage.setItem(CASE_STATE_KEY, JSON.stringify(merged));
+        } catch (e) {}
+      }
+
+      function appendAuditEvent(ev) {
+        var log = [];
+        try {
+          var raw = localStorage.getItem(AUDIT_LOG_KEY);
+          if (raw) log = JSON.parse(raw);
+          if (!Array.isArray(log)) log = [];
+        } catch (e) {
+          log = [];
+        }
+        log.push({
+          ts: new Date().toISOString(),
+          caseId: ev.caseId,
+          action_code: ev.action_code || '',
+          from_status: ev.from_status || '',
+          to_status: ev.to_status || ''
+        });
+        try {
+          localStorage.setItem(AUDIT_LOG_KEY, JSON.stringify(log));
+        } catch (e2) {}
+      }
+
+      function getAuditEventsForCase(caseId) {
+        try {
+          var raw = localStorage.getItem(AUDIT_LOG_KEY);
+          var log = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(log)) return [];
+          return log.filter(function (e) { return e.caseId === caseId; }).slice(-20);
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function saveCaseState(caseId, partial) {
+        if (partial.queue != null && partial.status_code == null) {
+          partial.status_code = migrateLegacyQueueField(partial.queue) || partial.queue;
+          delete partial.queue;
+        }
+        var map = getCaseStateMap();
+        if (!map[caseId]) map[caseId] = {};
+        var k;
+        for (k in partial) {
+          if (Object.prototype.hasOwnProperty.call(partial, k)) {
+            map[caseId][k] = partial[k];
+          }
+        }
+        map[caseId].updatedAt = new Date().toISOString();
+        try {
+          localStorage.setItem(CASE_STATE_KEY, JSON.stringify(map));
+        } catch (e) {}
+        if (partial.status_code != null) {
+          var c = (state.data.cases || []).find(function (x) { return x.id === caseId; });
+          if (c) c.status_code = partial.status_code;
+        }
+        syncCaseStateToServerDebounced();
+      }
+
+      function syncCaseStateToServerDebounced() {
+        if (serverSyncTimer) clearTimeout(serverSyncTimer);
+        serverSyncTimer = setTimeout(function () {
+          serverSyncTimer = null;
+          var map = getCaseStateMap();
+          fetch('api/save-case-state.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(map)
+          }).catch(function () {});
+        }, 800);
+      }
+
+      function applyCaseStateToCases() {
+        var map = getCaseStateMap();
+        (state.data.cases || []).forEach(function (c) {
+          var st = map[c.id];
+          if (st && st.status_code) c.status_code = st.status_code;
+        });
+      }
+
+      function readDraftsFromDom() {
+        var soapEl = document.getElementById('soap-draft');
+        var msgEl = document.getElementById('msg-patient');
+        return {
+          soapDraft: soapEl ? soapEl.value : '',
+          messageToPatient: msgEl ? msgEl.value : ''
+        };
+      }
+
+      function renderSessionHint() {
+        var el = document.getElementById('session-hint');
+        if (!el) return;
+        if (buildSessionCase()) {
+          el.innerHTML = '<div class="alert alert-success py-2 px-3 mb-3 small" role="status">An intake completed on this device may appear as <strong>SESSION-DEMO</strong> at the top of the list.</div>';
+        } else {
+          el.innerHTML = '';
+        }
+      }
+
+      function getDemoApproval() {
+        try {
+          var raw = localStorage.getItem('teleurgentcare_demo_approval');
+          if (!raw) return null;
+          return JSON.parse(raw);
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function saveDemoApproval(caseId, messageToPatient) {
+        var payload = {
+          caseId: caseId,
+          approvedAt: new Date().toISOString(),
+          messageToPatient: messageToPatient || 'Your visit has been reviewed and approved. Check My visits for details.'
+        };
+        try {
+          localStorage.setItem('teleurgentcare_demo_approval', JSON.stringify(payload));
+        } catch (e) {}
+        return payload;
+      }
+
+      function isActionAllowedForStatus(action, currentCode) {
+        var csv = action.allowed_statuses_csv || '';
+        if (csv === '*') return true;
+        var parts = csv.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+        if (parts.indexOf(currentCode) >= 0) return true;
+        return false;
+      }
+
+      function renderCaseCards() {
+        var root = document.getElementById('case-cards-root');
+        var countEl = document.getElementById('request-count-badge');
+        if (!root) return;
+        var list = allCasesSorted();
+        if (countEl) countEl.textContent = list.length + (list.length === 1 ? ' request' : ' requests');
+
+        if (!list.length) {
+          root.innerHTML = '<div class="col-12"><p class="text-muted mb-0">No requests to display.</p></div>';
+          return;
+        }
+
+        var approval = getDemoApproval();
+        root.innerHTML = list.map(function (c) {
+          var code = getEffectiveStatusCode(c);
+          var row = findStatusRow(code);
+          var qClass = statusBadgeClass(row);
+          var label = getStatusLabel(code);
+          var approved = approval && approval.caseId === c.id;
+          var approvedBadge = approved ? '<span class="badge bg-success ms-1">Approved</span>' : '';
+          var sla = c.sla_priority === 'urgent' ? '<span class="badge bg-danger ms-1">SLA urgent</span>' : '';
+          return (
+            '<div class="col">' +
+            '<button type="button" class="card h-100 shadow-sm border-0 inbox-card-btn w-100 p-0 overflow-hidden" data-case-id="' + escapeHtml(c.id) + '">' +
+            '<div class="card-body d-flex flex-column">' +
+            '<div class="d-flex flex-wrap justify-content-between align-items-start gap-1 mb-2">' +
+            '<span class="badge ' + qClass + ' status-badge-label text-start">' + escapeHtml(label) + '</span>' +
+            sla + approvedBadge +
+            '</div>' +
+            '<p class="small text-muted font-monospace mb-1">' + escapeHtml(code) + '</p>' +
+            '<h3 class="h6 card-title mb-1 text-truncate" title="' + escapeHtml(c.chiefComplaint || '') + '">' + escapeHtml(c.chiefComplaint || 'Request') + '</h3>' +
+            '<p class="small text-muted mb-0 text-truncate">' + escapeHtml(c.id) + '</p>' +
+            '</div></button></div>'
+          );
+        }).join('');
+
+        root.querySelectorAll('[data-case-id]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            state.selectedId = btn.getAttribute('data-case-id');
+            renderDetail();
+            if (requestModal) requestModal.show();
+          });
+        });
+      }
+
+      function renderDetail() {
+        var mount = document.getElementById('case-detail');
+        var titleEl = document.getElementById('requestDetailModalLabel');
+        var c = (state.data.cases || []).find(function (x) { return x.id === state.selectedId; });
+        if (!c) {
+          mount.innerHTML = '<p class="err mb-0">Request not found.</p>';
+          if (titleEl) titleEl.textContent = 'Request';
+          return;
+        }
+        if (titleEl) titleEl.textContent = c.id + ' · ' + c.patientLabel;
+
+        var currentCode = getEffectiveStatusCode(c);
+        var answersJson = JSON.stringify(c.answers || {}, null, 2);
+        var rf = c.redFlags || {};
+        var approval = getDemoApproval();
+        var isApprovedCase = approval && approval.caseId === c.id;
+        var html = '';
+        if (isApprovedCase) {
+          html += '<div class="alert alert-success mb-3" role="status"><strong>Approved (prototype)</strong> ';
+          html += 'Recorded ' + escapeHtml(formatDate(approval.approvedAt)) + '. ';
+          html += 'Preview: the patient can see an update on <strong>My visits</strong> on this browser when the case is SESSION-DEMO.</div>';
+        }
+        if (c._sessionDemo) {
+          html += '<p class="mb-3"><span class="badge bg-info text-dark">From demo intake</span> <span class="small text-muted">Completed on this browser — not saved to a server.</span></p>';
+        }
+        var persisted = getCaseState(c.id);
+        if (persisted.lastAction) {
+          html += '<p class="small text-muted border-start border-3 border-secondary ps-2 mb-3">Last action: <strong>' + escapeHtml(persisted.lastAction) + '</strong>';
+          if (persisted.updatedAt) {
+            html += ' <span class="text-muted">(' + escapeHtml(formatDate(persisted.updatedAt)) + ')</span>';
+          }
+          html += '</p>';
+        }
+
+        html += '<div class="card bg-light border-0 mb-3"><div class="card-body py-3">';
+        html += '<label for="case-status-select" class="form-label small fw-semibold mb-1">Workflow status</label>';
+        html += '<p class="small text-muted mb-2">Uses <code class="small">status_code</code> from project-scope schema. Stored in this browser; optional sync to <code class="small">data/physician-case-state.json</code> via PHP.</p>';
+        html += '<div class="d-flex flex-wrap align-items-center gap-2">';
+        html += '<select id="case-status-select" class="form-select form-select-sm" style="max-width:340px" aria-label="Workflow status code">';
+        state.statuses.forEach(function (s) {
+          var sel = currentCode === s.status_code ? ' selected' : '';
+          html += '<option value="' + escapeHtml(s.status_code) + '"' + sel + '>' + escapeHtml(s.status_code) + ' — ' + escapeHtml(s.status_label) + '</option>';
+        });
+        html += '</select><span class="small text-success" id="status-change-feedback" aria-live="polite"></span></div></div></div>';
+
+        html += '<div class="detail-row"><span class="label">Submitted</span>' + escapeHtml(formatDate(c.submittedAt)) + '</div>';
+        if (c.sla_priority) {
+          html += '<div class="detail-row"><span class="label">SLA priority</span>' + escapeHtml(c.sla_priority) + '</div>';
+        }
+        html += '<div class="detail-row"><span class="label">Entry</span>' + escapeHtml(c.entryMode || '') + '</div>';
+        html += '<div class="detail-row"><span class="label">Chief complaint</span>' + escapeHtml(c.chiefComplaint || '') + '</div>';
+        html += '<h3 class="h6 mt-3 text-secondary">Intake summary</h3>';
+        html += '<div class="detail-row">' + escapeHtml(c.intakeSummary || '') + '</div>';
+        html += '<h3 class="h6 mt-3 text-secondary">Assistant notes (clinician only)</h3>';
+        html += '<div class="detail-row">' + escapeHtml(c.aiRecommendation || '') + '</div>';
+        html += '<h3 class="h6 mt-3 text-secondary">Structured responses</h3>';
+        html += '<pre class="answers">' + escapeHtml(answersJson) + '</pre>';
+        html += '<h3 class="h6 mt-3 text-secondary">Safety review</h3>';
+        html += '<div class="detail-row">Reviewed: ' + escapeHtml(String(rf.reviewed)) + ' · Triggered: ' + escapeHtml(String(rf.triggered)) + '</div>';
+        if (rf.notes) html += '<div class="detail-row">' + escapeHtml(rf.notes) + '</div>';
+        html += '<div class="detail-row"><span class="label">Disposition (preview)</span>' + escapeHtml(c.disposition || '') + '</div>';
+        html += '<h3 class="h6 mt-3 text-secondary">Physician note (SOAP draft)</h3>';
+        html += '<textarea id="soap-draft" class="form-control form-control-sm soap mb-3" placeholder="Subjective, Objective, Assessment, Plan" title="Saved in this browser on blur or action" aria-label="SOAP draft"></textarea>';
+        html += '<h3 class="h6 mt-3 text-secondary">Prescribing</h3>';
+        html += '<div class="detail-row mb-3"><span class="label">e-Prescribe</span>Not connected in this preview.</div>';
+        html += '<h3 class="h6 mt-3 text-secondary">Message to patient</h3>';
+        html += '<textarea id="msg-patient" class="form-control form-control-sm soap mb-3" placeholder="Draft message to patient (optional — included when you Approve)" title="Saved in this browser on blur or action" aria-label="Patient message draft"></textarea>';
+        html += '<h3 class="h6 mt-3 text-secondary">Actions</h3>';
+        html += '<p class="small text-muted mb-2">Mapped from <code class="small">physician-actions.json</code> (schema-aligned).</p>';
+        html += '<div class="actions d-flex flex-wrap gap-2 mt-2">';
+        state.actions.forEach(function (act) {
+          var variant = act.button_variant === 'primary' ? 'btn-primary' : 'btn-outline-secondary';
+          var allowed = isActionAllowedForStatus(act, currentCode);
+          var disabled = allowed ? '' : ' disabled';
+          var title = allowed ? escapeHtml(act.action_label) : 'Not allowed from current status in strict mode';
+          html += '<button type="button" class="btn btn-sm ' + variant + '" data-action-code="' + escapeHtml(act.action_code) + '"' + disabled + ' title="' + title + '">' + escapeHtml(act.action_label) + '</button>';
+        });
+        html += '<span class="action-note small text-muted w-100 mt-1" id="action-feedback"></span></div>';
+
+        var auditEvents = getAuditEventsForCase(c.id);
+        if (auditEvents.length) {
+          html += '<div class="mt-4 pt-3 border-top"><h3 class="h6 text-secondary">Audit timeline</h3><ul class="small mb-0 ps-3">';
+          auditEvents.forEach(function (ev) {
+            html += '<li>' + escapeHtml(formatDate(ev.ts)) + ' · <code>' + escapeHtml(ev.action_code) + '</code>';
+            if (ev.from_status || ev.to_status) {
+              html += ' ' + escapeHtml(ev.from_status) + ' → ' + escapeHtml(ev.to_status);
+            }
+            html += '</li>';
+          });
+          html += '</ul></div>';
+        }
+
+        mount.innerHTML = '<div class="detail">' + html + '</div>';
+
+        var statusSel = document.getElementById('case-status-select');
+        if (statusSel) {
+          statusSel.addEventListener('change', function () {
+            if (!state.selectedId) return;
+            var next = statusSel.value;
+            var prev = currentCode;
+            saveCaseState(state.selectedId, { status_code: next, lastAction: 'status_code:' + next });
+            appendAuditEvent({ caseId: state.selectedId, action_code: 'manual_status_change', from_status: prev, to_status: next });
+            renderCaseCards();
+            var sfb = document.getElementById('status-change-feedback');
+            if (sfb) sfb.textContent = 'Saved';
+            window.setTimeout(function () {
+              var el = document.getElementById('status-change-feedback');
+              if (el) el.textContent = '';
+            }, 2000);
+            renderDetail();
+          });
+        }
+
+        var soapTa = document.getElementById('soap-draft');
+        var msgTa = document.getElementById('msg-patient');
+        var pSt = getCaseState(state.selectedId);
+        if (soapTa && pSt.soapDraft) soapTa.value = pSt.soapDraft;
+        if (msgTa && pSt.messageToPatient) msgTa.value = pSt.messageToPatient;
+        function onDraftBlur() {
+          if (!state.selectedId) return;
+          saveCaseState(state.selectedId, readDraftsFromDom());
+        }
+        if (soapTa) soapTa.addEventListener('blur', onDraftBlur);
+        if (msgTa) msgTa.addEventListener('blur', onDraftBlur);
+
+        mount.querySelectorAll('.actions button[data-action-code]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var code = btn.getAttribute('data-action-code');
+            var fb = document.getElementById('action-feedback');
+            if (!state.selectedId || !code) return;
+
+            var act = state.actions.find(function (a) { return a.action_code === code; });
+            if (!act) return;
+            if (!isActionAllowedForStatus(act, getEffectiveStatusCode(c))) {
+              if (fb) fb.textContent = 'This action is not allowed from the current status (see schema allowed_statuses_csv).';
+              return;
+            }
+
+            var prev = getEffectiveStatusCode(c);
+            var drafts = readDraftsFromDom();
+
+            if (act.action_code === 'prototype_approve_finalize') {
+              saveCaseState(state.selectedId, Object.assign({}, drafts, { status_code: 'completed', lastAction: act.action_label }));
+              saveDemoApproval(state.selectedId, (drafts.messageToPatient || '').trim());
+              appendAuditEvent({ caseId: state.selectedId, action_code: act.action_code, from_status: prev, to_status: 'completed' });
+              renderDetail();
+              renderCaseCards();
+              if (fb) fb.textContent = 'Approval and workflow saved. Patient notification on My visits (SESSION-DEMO) when applicable.';
+              return;
+            }
+
+            if (act.action_code === 'edit_assessment') {
+              saveCaseState(state.selectedId, Object.assign(drafts, { lastAction: act.action_label }));
+              appendAuditEvent({ caseId: state.selectedId, action_code: act.action_code, from_status: prev, to_status: prev });
+              renderDetail();
+              if (fb) fb.textContent = 'Drafts saved.';
+              return;
+            }
+
+            var next = act.resulting_status;
+            if (!next) {
+              saveCaseState(state.selectedId, Object.assign(drafts, { lastAction: act.action_label }));
+              appendAuditEvent({ caseId: state.selectedId, action_code: act.action_code, from_status: prev, to_status: prev });
+              renderDetail();
+              if (fb) fb.textContent = 'Saved.';
+              return;
+            }
+
+            saveCaseState(state.selectedId, Object.assign(drafts, { status_code: next, lastAction: act.action_label }));
+            appendAuditEvent({ caseId: state.selectedId, action_code: act.action_code, from_status: prev, to_status: next });
+            renderDetail();
+            renderCaseCards();
+            if (fb) fb.textContent = 'Saved. Status: ' + getStatusLabel(next) + '.';
+          });
+        });
+      }
+
+      Promise.all([
+        fetch('data/dashboard-statuses.json').then(function (r) { return r.json(); }),
+        fetch('data/physician-actions.json').then(function (r) { return r.json(); }),
+        fetch('data/physician-queue.json').then(function (r) { return r.json(); })
+      ])
+        .then(function (results) {
+          var statusPayload = results[0];
+          var actionPayload = results[1];
+          var queueData = results[2];
+          state.statuses = statusPayload.statuses || [];
+          state.actions = (actionPayload.actions || []).slice();
+          state.data = mergeSessionIntoData(queueData);
+          return fetch('data/physician-case-state.json')
+            .then(function (r) { return r.ok ? r.json() : Promise.resolve({}); })
+            .catch(function () { return {}; });
+        })
+        .then(function (serverMap) {
+          mergeServerCaseState(serverMap || {});
+          applyCaseStateToCases();
+          renderSessionHint();
+          renderCaseCards();
+        })
+        .catch(function () {
+          var root = document.getElementById('case-cards-root');
+          if (root) root.innerHTML = '<div class="col-12"><p class="err mb-0">Could not load inbox data. Use a local URL (e.g. http://localhost).</p></div>';
+          var countEl = document.getElementById('request-count-badge');
+          if (countEl) countEl.textContent = '—';
+        });
+    })();
+  </script>
+</body>
+</html>

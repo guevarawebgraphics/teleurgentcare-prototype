@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All prototype pages — TeleUrgentCare</title>
+  <link rel="stylesheet" href="assets/prototype-theme.css">
+  <style>
+    .hub-intro { font-size: 0.9375rem; color: var(--color-muted); margin: 0 0 1.25rem; max-width: 40rem; }
+    .hub-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .hub-table th, .hub-table td { border: 1px solid var(--color-border); padding: 0.6rem 0.75rem; text-align: left; vertical-align: top; }
+    .hub-table th { background: #f8fafc; font-weight: 600; }
+    .hub-table tr:nth-child(even) { background: #fafafa; }
+    .aud { font-size: 0.75rem; color: var(--color-muted); white-space: nowrap; }
+    .hub-section { margin-top: 1.5rem; }
+    .hub-section h2 { font-size: 1rem; margin: 0 0 0.5rem; color: #334155; }
+  </style>
+</head>
+<body class="prototype-body page-wide shell-presenter">
+  <div class="prototype-banner">
+    <div>Prototype for feedback — not for medical use or emergency care.</div>
+    <div class="prototype-banner__hub"><a href="prototype-hub.html">All prototype pages</a></div>
+  </div>
+
+  <p class="shell-label">Presenter / map</p>
+  <header class="app-header">
+    <h1>All prototype pages</h1>
+    <p class="tagline hub-intro">Use this screen to jump to any static page in the folder. Patient-facing flows are separate from clinician tools — see Audience on each row.</p>
+  </header>
+
+  <nav class="nav-strip" aria-label="Quick links">
+    <a href="index.html">Patient home (intake)</a>
+    <a href="patient-dashboard.html">My visits</a>
+    <a href="physician-dashboard.html">Clinician inbox</a>
+    <a href="question-bank.html">Question topics</a>
+    <a href="readme.html">What to expect</a>
+  </nav>
+
+  <div class="card">
+    <table class="hub-table">
+      <thead>
+        <tr>
+          <th scope="col">Page</th>
+          <th scope="col">Purpose</th>
+          <th scope="col">Audience</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><a href="index.html">index.html</a></td>
+          <td>Start a visit — condition or symptom intake.</td>
+          <td><span class="aud">Patient</span></td>
+        </tr>
+        <tr>
+          <td><a href="patient-dashboard.html">patient-dashboard.html</a></td>
+          <td>Track visit status and sample requests.</td>
+          <td><span class="aud">Patient</span></td>
+        </tr>
+        <tr>
+          <td><a href="readme.html">readme.html</a></td>
+          <td>Journey, scope, and process flow (long read).</td>
+          <td><span class="aud">Patient · Presenter</span></td>
+        </tr>
+        <tr>
+          <td><a href="physician-dashboard.html">physician-dashboard.html</a></td>
+          <td>Inbox, queues, case detail (sample data + session intake).</td>
+          <td><span class="aud">Clinician</span></td>
+        </tr>
+        <tr>
+          <td><a href="question-bank.html">question-bank.html</a></td>
+          <td>Reference list of example questions by topic.</td>
+          <td><span class="aud">Clinician · Presenter</span></td>
+        </tr>
+        <tr>
+          <td><a href="prototype-hub.html">prototype-hub.html</a></td>
+          <td>This map of every HTML file (for demos and testing).</td>
+          <td><span class="aud">Presenter</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="subtitle-muted" style="margin-top:1.5rem"><a href="index.html">← Patient home</a></p>
+</body>
+</html>

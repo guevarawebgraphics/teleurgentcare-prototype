@@ -1,0 +1,70 @@
+{
+  "actions": [
+    {
+      "action_code": "prototype_approve_finalize",
+      "action_label": "Approve",
+      "action_group": "completion",
+      "allowed_statuses_csv": "*",
+      "resulting_status": "completed",
+      "prototype_only": true,
+      "save_patient_approval": true,
+      "button_variant": "primary"
+    },
+    {
+      "action_code": "edit_assessment",
+      "action_label": "Edit assessment",
+      "action_group": "assessment",
+      "allowed_statuses_csv": "*",
+      "resulting_status": "",
+      "button_variant": "outline-secondary"
+    },
+    {
+      "action_code": "request_clarification",
+      "action_label": "Request clarification",
+      "action_group": "clarification",
+      "allowed_statuses_csv": "*",
+      "resulting_status": "awaiting_clarification",
+      "button_variant": "outline-secondary"
+    },
+    {
+      "action_code": "start_prescription",
+      "action_label": "Start prescription draft",
+      "action_group": "prescription",
+      "allowed_statuses_csv": "*",
+      "resulting_status": "pending_prescription_review",
+      "button_variant": "primary"
+    },
+    {
+      "action_code": "choose_advice_only",
+      "action_label": "Send advice only",
+      "action_group": "plan",
+      "allowed_statuses_csv": "*",
+      "resulting_status": "ready_to_finalize",
+      "button_variant": "outline-secondary"
+    },
+    {
+      "action_code": "escalate_urgent_in_person",
+      "action_label": "Escalate to urgent in-person care",
+      "action_group": "escalation",
+      "allowed_statuses_csv": "*",
+      "resulting_status": "escalate_urgent_in_person",
+      "button_variant": "outline-secondary"
+    },
+    {
+      "action_code": "escalate_er",
+      "action_label": "Escalate to emergency care",
+      "action_group": "escalation",
+      "allowed_statuses_csv": "*",
+      "resulting_status": "escalate_er",
+      "button_variant": "outline-secondary"
+    },
+    {
+      "action_code": "send_final_message",
+      "action_label": "Close case",
+      "action_group": "completion",
+      "allowed_statuses_csv": "*",
+      "resulting_status": "completed",
+      "button_variant": "outline-secondary"
+    }
+  ]
+}

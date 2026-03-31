@@ -1,0 +1,14 @@
+{
+    "PHY-1041": {
+        "status_code": "awaiting_clarification",
+        "lastAction": "status_code:awaiting_clarification",
+        "updatedAt": "2026-03-28T11:06:17.873Z"
+    },
+    "PHY-1011": {
+        "soapDraft": "",
+        "messageToPatient": "",
+        "status_code": "escalate_er",
+        "lastAction": "Escalate to emergency care",
+        "updatedAt": "2026-03-28T11:22:46.577Z"
+    }
+}
